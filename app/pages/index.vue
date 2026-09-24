@@ -24,9 +24,11 @@
             /><span class="notification-dot"></span></button
           ><button class="mini-avatar">WSC</button>
         </div>
-        <div v-if="showNotifications" class="notification-popover">
-          Nenhuma notificação nova
-        </div>
+        <Transition name="notification-pop">
+          <div v-if="showNotifications" class="notification-popover">
+            Nenhuma notificação nova
+          </div>
+        </Transition>
       </header>
       <section class="page-heading">
         <div>

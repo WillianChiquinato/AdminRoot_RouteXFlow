@@ -28,6 +28,15 @@ export interface IAuthMe {
   user: IAuth
 }
 
+export interface IForgotPassword {
+  email: string;
+}
+
+export interface IResetPassword {
+  token: string;
+  password: string;
+}
+
 export default class AuthService extends ClientService<any> {
   constructor() {
     super("Auth", "api/Auth");
@@ -61,6 +70,28 @@ export default class AuthService extends ClientService<any> {
   Logout = async (config: FetchOptions = {}): Promise<ApiResponse<null>> => {
     return await this.fetchInstance(`${this.address}/logout`, {
       method: "POST",
+      ...config,
+    });
+  };
+
+  ForgotPassword = async (
+    data: IForgotPassword,
+    config: FetchOptions = {}
+  ): Promise<ApiResponse<boolean>> => {
+    return await this.fetchInstance(`${this.address}/forgot-password`, {
+      method: "POST",
+      body: data,
+      ...config,
+    });
+  };
+
+  ResetPassword = async (
+    data: IResetPassword,
+    config: FetchOptions = {}
+  ): Promise<ApiResponse<boolean>> => {
+    return await this.fetchInstance(`${this.address}/reset-password`, {
+      method: "POST",
+      body: data,
       ...config,
     });
   };

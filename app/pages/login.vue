@@ -40,53 +40,252 @@
           <div class="brand-mark"><span></span><span></span><span></span></div>
           <span>route<span class="brand-accent">X</span>flow</span>
         </div>
-        <p class="eyebrow">BEM-VINDO</p>
-        <h2>Entre no seu painel</h2>
-        <p class="form-intro">Acompanhe suas corridas e organize seu dia.</p>
-        <form @submit.prevent="login">
-          <label for="email"
-            >E-mail<input
-              id="email"
-              v-model="email"
-              type="email"
-              placeholder="voce@email.com"
-              autocomplete="email"
-          /></label>
 
-          <label for="password"
-            >Senha
-            <div class="password-field">
-              <input
-                id="password"
-                v-model="password"
-                :type="flagPasswordEye ? 'text' : 'password'"
-                placeholder="Digite sua senha"
-                autocomplete="current-password"
-              />
-              <button
-                type="button"
-                class="password-toggle"
-                :aria-label="flagPasswordEye ? 'Ocultar senha' : 'Mostrar senha'"
-                @click="flagPasswordEye = !flagPasswordEye"
-              >
-                <EyeOff v-if="!flagPasswordEye" :size="17" />
-                <Eye v-else :size="17" />
-              </button>
-            </div></label
-          >
-          <div class="form-options">
-            <label class="remember"
-              ><Checkbox v-model="remember" binary /><span>Lembrar de mim</span></label
-            ><a href="#">Esqueci minha senha</a>
-          </div>
-          <p v-if="error" class="form-error">{{ error }}</p>
-          <button class="login-button" type="submit">
-            Entrar no painel <span>→</span>
-          </button>
-        </form>
-        <p class="signup-copy">
-          Ainda não tem uma conta? <a href="#">Criar conta</a>
-        </p>
+        <Tabs v-model:value="activeTab" class="auth-tabs">
+          <TabList>
+            <Tab value="login">Entrar</Tab>
+            <Tab value="register">Criar conta</Tab>
+            <Tab value="forgot">Recuperar senha</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel value="login">
+              <p class="eyebrow">BEM-VINDO</p>
+              <h2>Entre no seu painel</h2>
+              <p class="form-intro">
+                Acompanhe suas corridas e organize seu dia.
+              </p>
+              <form @submit.prevent="login">
+                <label for="email"
+                  >E-mail<input
+                    id="email"
+                    v-model="email"
+                    type="email"
+                    placeholder="voce@email.com"
+                    autocomplete="email"
+                /></label>
+
+                <label for="password"
+                  >Senha
+                  <div class="password-field">
+                    <input
+                      id="password"
+                      v-model="password"
+                      :type="flagPasswordEye ? 'text' : 'password'"
+                      placeholder="Digite sua senha"
+                      autocomplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      :aria-label="
+                        flagPasswordEye ? 'Ocultar senha' : 'Mostrar senha'
+                      "
+                      @click="flagPasswordEye = !flagPasswordEye"
+                    >
+                      <EyeOff v-if="!flagPasswordEye" :size="17" />
+                      <Eye v-else :size="17" />
+                    </button>
+                  </div></label
+                >
+                <div class="form-options">
+                  <label class="remember"
+                    ><Checkbox v-model="remember" binary /><span
+                      >Lembrar de mim</span
+                    ></label
+                  ><a href="#" @click.prevent="activeTab = 'forgot'"
+                    >Esqueci minha senha</a
+                  >
+                </div>
+                <p v-if="error" class="form-error">{{ error }}</p>
+                <button class="login-button" type="submit">
+                  Entrar no painel <span>→</span>
+                </button>
+              </form>
+              <p class="signup-copy">
+                Ainda não tem uma conta?
+                <a href="#" @click.prevent="activeTab = 'register'"
+                  >Criar conta</a
+                >
+              </p>
+            </TabPanel>
+
+            <TabPanel value="register">
+              <p class="eyebrow">CRIE SUA CONTA</p>
+              <h2>Cadastre-se no RouteXFlow</h2>
+              <p class="form-intro">
+                Preencha seus dados para começar a otimizar suas rotas.
+              </p>
+              <form @submit.prevent="register">
+                <label for="register-name"
+                  >Nome completo<input
+                    id="register-name"
+                    v-model="registerForm.name"
+                    type="text"
+                    placeholder="Seu nome completo"
+                    autocomplete="name"
+                /></label>
+
+                <label for="register-email"
+                  >E-mail<input
+                    id="register-email"
+                    v-model="registerForm.email"
+                    type="email"
+                    placeholder="voce@email.com"
+                    autocomplete="email"
+                /></label>
+
+                <div class="field-row">
+                  <label for="register-cpf"
+                    >CPF<InputMask
+                      id="register-cpf"
+                      v-model="registerForm.cpf"
+                      mask="999.999.999-99"
+                      type="text"
+                      placeholder="000.000.000-00"
+                      autocomplete="off"
+                  /></label>
+                  <label for="register-phone"
+                    >Telefone<InputMask
+                      id="register-phone"
+                      v-model="registerForm.phoneNumber"
+                      mask="(99)99999-9999"
+                      type="text"
+                      placeholder="(00) 00000-0000"
+                      autocomplete="tel"
+                  /></label>
+                </div>
+
+                <label for="register-role"
+                  >Perfil de acesso
+                  <Select
+                    id="register-role"
+                    v-model="registerForm.roleId"
+                    :options="roles"
+                    optionLabel="name"
+                    optionValue="id"
+                    placeholder="Selecione um perfil"
+                    class="form-dropdown"
+                    fluid
+                  />
+                </label>
+
+                <label for="register-apps"
+                  >Aplicativos que você usa
+                  <MultiSelect
+                    id="register-apps"
+                    v-model="registerForm.appActives"
+                    :options="apps"
+                    optionLabel="name"
+                    optionValue="id"
+                    placeholder="Selecione os aplicativos"
+                    display="chip"
+                    class="form-dropdown"
+                    fluid
+                  />
+                </label>
+
+                <label for="register-password"
+                  >Senha
+                  <div class="password-field">
+                    <input
+                      id="register-password"
+                      v-model="registerForm.password"
+                      :type="flagRegisterPasswordEye ? 'text' : 'password'"
+                      placeholder="Crie uma senha"
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      :aria-label="
+                        flagRegisterPasswordEye
+                          ? 'Ocultar senha'
+                          : 'Mostrar senha'
+                      "
+                      @click="
+                        flagRegisterPasswordEye = !flagRegisterPasswordEye
+                      "
+                    >
+                      <EyeOff v-if="!flagRegisterPasswordEye" :size="17" />
+                      <Eye v-else :size="17" />
+                    </button>
+                  </div></label
+                >
+
+                <label for="register-confirm-password"
+                  >Confirmar senha
+                  <div class="password-field">
+                    <input
+                      id="register-confirm-password"
+                      v-model="registerForm.confirmPassword"
+                      :type="flagConfirmPasswordEye ? 'text' : 'password'"
+                      placeholder="Repita a senha"
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      :aria-label="
+                        flagConfirmPasswordEye
+                          ? 'Ocultar senha'
+                          : 'Mostrar senha'
+                      "
+                      @click="
+                        flagConfirmPasswordEye = !flagConfirmPasswordEye
+                      "
+                    >
+                      <EyeOff v-if="!flagConfirmPasswordEye" :size="17" />
+                      <Eye v-else :size="17" />
+                    </button>
+                  </div></label
+                >
+
+                <p v-if="registerError" class="form-error">
+                  {{ registerError }}
+                </p>
+                <button class="login-button" type="submit">
+                  Criar conta <span>→</span>
+                </button>
+              </form>
+              <p class="signup-copy">
+                Já tem uma conta?
+                <a href="#" @click.prevent="activeTab = 'login'">Entrar</a>
+              </p>
+            </TabPanel>
+
+            <TabPanel value="forgot">
+              <p class="eyebrow">RECUPERAR SENHA</p>
+              <h2>Esqueceu sua senha?</h2>
+              <p class="form-intro">
+                Informe seu e-mail e enviaremos instruções para redefinir sua
+                senha.
+              </p>
+              <form @submit.prevent="forgotPassword">
+                <label for="forgot-email"
+                  >E-mail<input
+                    id="forgot-email"
+                    v-model="forgotEmail"
+                    type="email"
+                    placeholder="voce@email.com"
+                    autocomplete="email"
+                /></label>
+
+                <p v-if="forgotError" class="form-error">{{ forgotError }}</p>
+                <p v-if="forgotSent" class="form-success">
+                  Se o e-mail informado existir em nossa base, você receberá
+                  as instruções em instantes.
+                </p>
+                <button class="login-button" type="submit">
+                  Enviar instruções <span>→</span>
+                </button>
+              </form>
+              <p class="signup-copy">
+                Lembrou sua senha?
+                <a href="#" @click.prevent="activeTab = 'login'">Entrar</a>
+              </p>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </div>
       <p class="legal-copy">
         Ao continuar, você concorda com nossos termos de uso e política de
@@ -97,19 +296,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, reactive, watch } from "vue";
 
 import { Eye } from "@lucide/vue";
 import { EyeOff } from "@lucide/vue";
-import { Checkbox } from "primevue";
+import {
+  Checkbox,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Select,
+  MultiSelect,
+  InputMask
+} from "primevue";
 import useLoading from "~/composable/useLoading";
 import { setLoggedUser } from "~/composable/useAuth";
 import { useNuxtApp } from "#app";
+import type { IRole } from "~/infra/interfaces/services/role";
+import type { IApp } from "~/infra/interfaces/services/app";
 
-import { useToastService } from '~/composable/useToast';
+import { useToastService } from "~/composable/useToast";
 const toast = useToastService();
 
 const { loadingPush, loadingPop } = useLoading();
+
+const activeTab = ref("login");
 
 const email = ref("");
 const password = ref("");
@@ -149,6 +362,156 @@ async function login() {
   } catch (cause: any) {
     const message = cause?.errors?.[0] ?? "Não foi possível entrar. Tente novamente.";
     error.value = message;
+    toast.error(message);
+  } finally {
+    loadingPop();
+  }
+}
+
+const roles = ref<IRole[]>([]);
+const apps = ref<IApp[]>([]);
+
+const registerForm = reactive({
+  name: "",
+  email: "",
+  cpf: "",
+  phoneNumber: "",
+  roleId: null as number | null,
+  appActives: [] as number[],
+  password: "",
+  confirmPassword: "",
+});
+const registerError = ref("");
+const flagRegisterPasswordEye = ref(false);
+const flagConfirmPasswordEye = ref(false);
+
+async function loadRegisterOptions() {
+  try {
+    const { $httpClient } = useNuxtApp();
+    const [rolesResponse, appsResponse] = await Promise.all([
+      $httpClient.role.RoleList(),
+      $httpClient.app.AppList(),
+    ]);
+
+    if (rolesResponse.success) roles.value = rolesResponse.result;
+    if (appsResponse.success) apps.value = appsResponse.result;
+  } catch {
+    toast.error("Não foi possível carregar os perfis e aplicativos disponíveis.");
+  }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === "register" && roles.value.length === 0 && apps.value.length === 0) {
+    loadRegisterOptions();
+  }
+});
+
+function resetRegisterForm() {
+  registerForm.name = "";
+  registerForm.email = "";
+  registerForm.cpf = "";
+  registerForm.phoneNumber = "";
+  registerForm.roleId = null;
+  registerForm.appActives = [];
+  registerForm.password = "";
+  registerForm.confirmPassword = "";
+}
+
+async function register() {
+  loadingPush();
+  registerError.value = "";
+
+  if (
+    !registerForm.name ||
+    !registerForm.email ||
+    !registerForm.cpf ||
+    !registerForm.phoneNumber ||
+    !registerForm.roleId ||
+    !registerForm.password
+  ) {
+    registerError.value = "Preencha todos os campos obrigatórios.";
+    toast.error(registerError.value);
+    loadingPop();
+    return;
+  }
+
+  if (registerForm.password !== registerForm.confirmPassword) {
+    registerError.value = "As senhas informadas não coincidem.";
+    toast.error(registerError.value);
+    loadingPop();
+    return;
+  }
+
+  var formatCPF = cleanNumber(registerForm.cpf);
+  var formatTell = cleanNumber(registerForm.phoneNumber);
+
+  try {
+    const { $httpClient } = useNuxtApp();
+    const response = await $httpClient.user.Register({
+      name: registerForm.name,
+      email: registerForm.email,
+      cpf: formatCPF,
+      phoneNumber: formatTell,
+      password: registerForm.password,
+      roleId: registerForm.roleId,
+      appActives: registerForm.appActives,
+    });
+
+    if (!response.success) {
+      toast.error(response.errors[0] ?? "Não foi possível concluir o cadastro.");
+      return;
+    }
+
+    toast.success("Cadastro realizado com sucesso. Faça login para continuar.");
+    email.value = registerForm.email;
+    resetRegisterForm();
+    activeTab.value = "login";
+  } catch (cause: any) {
+    const message =
+      cause?.errors?.[0] ?? "Não foi possível concluir o cadastro. Tente novamente.";
+    registerError.value = message;
+    toast.error(message);
+  } finally {
+    loadingPop();
+  }
+}
+
+const forgotEmail = ref("");
+const forgotError = ref("");
+const forgotSent = ref(false);
+
+async function forgotPassword() {
+  loadingPush();
+  forgotError.value = "";
+  forgotSent.value = false;
+
+  if (!forgotEmail.value) {
+    forgotError.value = "Informe seu e-mail para continuar.";
+    toast.error(forgotError.value);
+    loadingPop();
+    return;
+  }
+
+  try {
+    const { $httpClient } = useNuxtApp();
+    const response = await $httpClient.auth.ForgotPassword({
+      email: forgotEmail.value,
+    });
+
+    if (!response.success) {
+      toast.error(
+        response.errors[0] ?? "Não foi possível enviar as instruções."
+      );
+      return;
+    }
+
+    forgotSent.value = true;
+    toast.success("Instruções de recuperação enviadas para o seu e-mail.");
+  } catch (cause: any) {
+    const message =
+      cause?.errors?.[0] ??
+      "Não foi possível enviar as instruções. Tente novamente.";
+    forgotError.value = message;
     toast.error(message);
   } finally {
     loadingPop();
@@ -342,12 +705,58 @@ async function login() {
   margin: 0 0 32px;
 }
 
-.login-form-panel form > label {
+.auth-tabs {
+  :deep(.p-tablist) {
+    margin-bottom: 28px;
+    border-bottom: 1px solid #e5ece7;
+  }
+
+  :deep(.p-tablist-tab-list) {
+    background: transparent;
+  }
+
+  :deep(.p-tab) {
+    padding: 0 0 12px;
+    margin-right: 24px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #9aa79f;
+    background: transparent;
+    border: none;
+  }
+
+  :deep(.p-tab-active) {
+    color: var(--green);
+  }
+
+  :deep(.p-tablist-active-bar) {
+    background: var(--green);
+    height: 2px;
+  }
+
+  :deep(.p-tabpanels) {
+    padding: 0;
+    background: transparent;
+  }
+}
+
+.login-form-panel form > label,
+.login-form-panel form > .field-row > label {
   display: block;
   color: #506057;
   font-size: 11px;
   font-weight: 600;
   margin-bottom: 18px;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+
+  label {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .login-form-panel input[type="email"],
@@ -367,6 +776,32 @@ async function login() {
 .login-form-panel input:focus {
   border-color: var(--green);
   box-shadow: 0 0 0 3px #dff2e6;
+}
+
+.form-dropdown {
+  margin-top: 8px;
+
+  :deep(.p-select-label),
+  :deep(.p-multiselect-label) {
+    padding: 13px 14px;
+    font-size: 12px;
+  }
+
+  &:deep(.p-select),
+  &:deep(.p-multiselect) {
+    border: 1px solid #dfe8e1;
+    border-radius: 5px;
+  }
+
+  :deep(.p-select-dropdown svg),
+  :deep(.p-multiselect-dropdown svg) {
+    transition: transform 0.2s ease;
+  }
+
+  :deep(.p-select-open .p-select-dropdown svg),
+  :deep(.p-multiselect-open .p-multiselect-dropdown svg) {
+    transform: rotate(180deg);
+  }
 }
 
 .password-field {
@@ -456,6 +891,12 @@ async function login() {
 
 .form-error {
   color: #c65b4d;
+  font-size: 11px;
+  margin: -10px 0 15px;
+}
+
+.form-success {
+  color: var(--green);
   font-size: 11px;
   margin: -10px 0 15px;
 }
