@@ -43,3 +43,23 @@ export const formatCurrency = (value: number): string => {
     currency: 'BRL',
   }).format(value);
 };
+
+export const getActiveHours = () => {
+  const currentHour = new Date().getHours();
+  if (currentHour >= 5 && currentHour < 12) {
+    return "Bom dia";
+  } else if (currentHour >= 12 && currentHour < 18) {
+    return "Boa tarde";
+  } else {
+    return "Boa noite";
+  }
+};
+
+export const getDateNow = ref(
+  new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }),
+);

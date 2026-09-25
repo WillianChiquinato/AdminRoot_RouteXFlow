@@ -226,26 +226,6 @@
 <script setup lang="ts">
 import { Bell } from "@lucide/vue";
 
-const getDateNow = ref(
-  new Date().toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }),
-);
-
-const getActiveHours = () => {
-  const currentHour = new Date().getHours();
-  if (currentHour >= 5 && currentHour < 12) {
-    return "Bom dia";
-  } else if (currentHour >= 12 && currentHour < 18) {
-    return "Boa tarde";
-  } else {
-    return "Boa noite";
-  }
-};
-
 const isOnline = ref(true);
 const showNotifications = ref(false);
 const deliveries = [
@@ -305,24 +285,6 @@ const deliveries = [
   border-radius: 50%;
   right: 1px;
   top: 3px;
-}
-
-.page-heading {
-  padding: 35px 0 27px;
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-
-  h1 {
-    font: 700 30px "Space Grotesk";
-    letter-spacing: -1.2px;
-    margin: 0;
-  }
-
-  h1 span {
-    font-size: 23px;
-    margin-left: 5px;
-  }
 }
 
 .heading-copy {
@@ -912,17 +874,6 @@ footer span {
   }
 }
 @media (max-width: 680px) {
-  .page-heading {
-    align-items: start;
-    flex-direction: column;
-    gap: 19px;
-    padding: 27px 0 23px;
-    
-    h1 {
-      font-size: 25px;
-    }
-  }
-
   .primary-button {
     align-self: stretch;
     text-align: center;
