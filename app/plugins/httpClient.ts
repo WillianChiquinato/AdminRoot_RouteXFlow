@@ -6,6 +6,8 @@ import RoleService from "~/infra/interfaces/services/role";
 import AppService from "~/infra/interfaces/services/app";
 import ContainerService from "~/infra/interfaces/services/container";
 import DeviceService from "~/infra/interfaces/services/device";
+import FinanceService from "~/infra/interfaces/services/finance";
+import WorkSessionService from "~/infra/interfaces/services/workSession";
 
 export default defineNuxtPlugin(()=>{
 
@@ -16,6 +18,8 @@ export default defineNuxtPlugin(()=>{
 		app: new AppService(),
 		container: new ContainerService(),
 		device: new DeviceService(),
+		finance: new FinanceService(),
+		workSession: new WorkSessionService(),
 	};
 
   return {

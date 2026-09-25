@@ -6,17 +6,9 @@ const sections: Record<string, { title: string; description: string }> = {
     description:
       "Conecte o 99Food e o iFood para combinar suas próximas corridas.",
   },
-  rides: {
-    title: "Corridas",
-    description: "Acompanhe suas corridas ativas e o histórico de entregas.",
-  },
   routes: {
     title: "Rotas",
     description: "Visualize e organize os melhores caminhos para o seu dia.",
-  },
-  finance: {
-    title: "Financeiro",
-    description: "Consulte ganhos, despesas e o desempenho das suas entregas.",
   },
 };
 const section = computed(

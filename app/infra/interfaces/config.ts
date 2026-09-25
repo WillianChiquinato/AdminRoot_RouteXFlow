@@ -4,6 +4,8 @@ import type RoleService from "./services/role";
 import type AppService from "./services/app";
 import type ContainerService from "./services/container";
 import type DeviceService from "./services/device";
+import type FinanceService from "./services/finance";
+import type WorkSessionService from "./services/workSession";
 
 export interface IClientHttp {
     auth: AuthService;
@@ -12,4 +14,6 @@ export interface IClientHttp {
     app: AppService;
     container: ContainerService;
     device: DeviceService;
+    finance: FinanceService;
+    workSession: WorkSessionService;
 }

@@ -1,5 +1,5 @@
 <template>
-  <Toast :key="toastKey" :position="toastPosition" :pt="{
+  <Toast :key="toastKey" :position="toastPosition" :base-z-index="9999" :pt="{
     root: { class: 'toast-container' },
     message: { class: 'toast-message-wrapper' },
     content: { style: 'padding: 0; display: flex; align-items: center;' },
@@ -261,7 +261,7 @@ watch(
 /* Override PrimeVue default styles */
 :deep(.p-toast) {
   --p-toast-message-gap: 10px;
-  z-index: 10000 !important;
+  z-index: 9999 !important;
 }
 
 :deep(.p-toast-message) {
