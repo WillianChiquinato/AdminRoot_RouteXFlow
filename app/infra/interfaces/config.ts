@@ -6,6 +6,7 @@ import type ContainerService from "./services/container";
 import type DeviceService from "./services/device";
 import type FinanceService from "./services/finance";
 import type WorkSessionService from "./services/workSession";
+import type RouteService from "./services/route";
 
 export interface IClientHttp {
     auth: AuthService;
@@ -16,4 +17,5 @@ export interface IClientHttp {
     device: DeviceService;
     finance: FinanceService;
     workSession: WorkSessionService;
+    route: RouteService;
 }

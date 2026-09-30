@@ -8,6 +8,7 @@ import ContainerService from "~/infra/interfaces/services/container";
 import DeviceService from "~/infra/interfaces/services/device";
 import FinanceService from "~/infra/interfaces/services/finance";
 import WorkSessionService from "~/infra/interfaces/services/workSession";
+import RouteService from "~/infra/interfaces/services/route";
 
 export default defineNuxtPlugin(()=>{
 
@@ -20,6 +21,7 @@ export default defineNuxtPlugin(()=>{
 		device: new DeviceService(),
 		finance: new FinanceService(),
 		workSession: new WorkSessionService(),
+			route: new RouteService(),
 	};
 
   return {

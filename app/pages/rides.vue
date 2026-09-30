@@ -1006,7 +1006,7 @@ onUnmounted(() => {
 
 .filter-row {
   display: grid;
-  grid-template-columns: repeat(3, 200px);
+  grid-template-columns: repeat(3, minmax(0, 200px));
   gap: 14px;
 
   label {

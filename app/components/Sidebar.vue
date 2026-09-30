@@ -1,5 +1,16 @@
 <template>
-  <aside class="sidebar">
+  <button
+    class="menu-toggle"
+    :aria-label="isOpen ? 'Fechar menu' : 'Abrir menu'"
+    :aria-expanded="isOpen"
+    @click="isOpen = !isOpen"
+  >
+    <component class="menu-toggle-icon" :is="isOpen ? X : Menu" />
+  </button>
+  <Transition name="sidebar-fade">
+    <div v-if="isOpen" class="sidebar-backdrop" @click="isOpen = false"></div>
+  </Transition>
+  <aside class="sidebar" :class="{ open: isOpen }">
     <div class="brand">
       <div class="brand-mark"><span></span><span></span><span></span></div>
       <span>route<span class="brand-accent">X</span>flow</span>
@@ -63,10 +74,24 @@ import {
   LogOut,
   Settings,
   CircleQuestionMark,
+  Menu,
+  X,
 } from "@lucide/vue";
 import { logout as logoutUser } from "~/composable/useAuth";
 
 const route = useRoute();
+const isOpen = ref(false);
+
+watch(
+  () => route.path,
+  () => (isOpen.value = false),
+);
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === "Escape") isOpen.value = false;
+}
+onMounted(() => window.addEventListener("keydown", onKeydown));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 const navigation = [
   { label: "Visão geral", icon: LayoutDashboard, to: "/" },
   { label: "Sincronizar", icon: RefreshCw, badge: "2", to: "/sync" },
@@ -319,39 +344,74 @@ async function logout() {
     flex-basis: 210px;
   }
 }
+.menu-toggle,
+.sidebar-backdrop {
+  display: none;
+}
+
 @media (max-width: 680px) {
+  .menu-toggle {
+    position: fixed;
+    top: 14px;
+    left: 15px;
+    z-index: 60;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #18302212;
+  }
+
+  .menu-toggle-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(23, 32, 29, 0.45);
+    z-index: 70;
+  }
+
+  .sidebar-fade-enter-active,
+  .sidebar-fade-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .sidebar-fade-enter-from,
+  .sidebar-fade-leave-to {
+    opacity: 0;
+  }
+
   .sidebar {
-    width: 64px;
-    flex-basis: 64px;
-    padding: 20px 8px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(290px, 85vw);
+    flex-basis: auto;
+    height: 100dvh;
+    max-height: 100dvh;
+    z-index: 80;
+    padding: 24px 16px 20px;
+    transform: translateX(-100%);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
   }
 
-  .brand {
-    padding: 0 10px 30px;
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 8px 0 30px #17201d30;
   }
 
-  .brand > span,
-  .profile-card > div:not(.avatar),
-  .more-button,
-  .nav-label,
-  .nav-item > span:not(.nav-icon),
-  .nav-badge,
-  .support-box,
-  .logout {
-    display: none;
-  }
-  .profile-card {
-    padding: 7px;
-    border: 0;
-    background: transparent;
-    margin-bottom: 24px;
-  }
   .nav-item {
-    justify-content: center;
-    padding: 12px 0;
-  }
-  .nav-icon {
-    font-size: 20px;
+    padding: 13px;
   }
 }
 </style>

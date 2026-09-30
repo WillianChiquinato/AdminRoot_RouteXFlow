@@ -214,13 +214,54 @@ a {
 }
 
 @media (max-width: 680px) {
+  .app-shell {
+    display: block;
+  }
   .content {
     padding: 0 15px 22px;
   }
   .topbar {
     height: 68px;
+    padding-left: 52px;
+    gap: 10px;
+  }
+  .breadcrumb {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .breadcrumb b {
+    margin: 0 6px;
+  }
+  .top-actions {
+    gap: 12px;
+    flex-shrink: 0;
   }
   .live-status {
     display: none;
+  }
+  .notification-popover {
+    right: 0;
+    top: 62px;
+  }
+  .page-heading {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 24px 0 20px;
+
+    h1 {
+      font-size: 24px;
+      letter-spacing: -0.8px;
+    }
+
+    h1 span {
+      font-size: 19px;
+    }
+  }
+  .page-heading .primary-button,
+  .page-heading .outline-button {
+    text-align: center;
   }
 }

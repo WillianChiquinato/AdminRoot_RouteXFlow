@@ -8,6 +8,10 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt'],
   css: ['~/assets/css/main.css'],
   vite: {
+    // O pré-bundle do Vite quebra o web worker do MapLibre (maplibre-gl-worker.mjs).
+    optimizeDeps: {
+      exclude: ['maplibre-gl']
+    },
     css: {
       transformer: 'postcss'
     }
