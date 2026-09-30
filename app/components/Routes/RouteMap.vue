@@ -331,19 +331,19 @@ onBeforeUnmount(() => {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--bd-ffffff);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  color: #fff;
+  color: var(--fg-ffffff);
   font: 700 12px "Space Grotesk", sans-serif;
   cursor: pointer;
 }
 
 .rx-pin-origin {
-  background: #22714e;
+  background: var(--bg-22714e);
 }
 
 .rx-pin-dest {
-  background: #c0503a;
+  background: var(--bg-c0503a);
   border-radius: 6px;
 }
 
@@ -358,7 +358,7 @@ onBeforeUnmount(() => {
 .rx-popup {
   min-width: 200px;
   font-size: 11px;
-  color: #48564e;
+  color: var(--fg-48564e);
 
   h4 {
     font: 600 13px "Space Grotesk", sans-serif;
@@ -367,7 +367,7 @@ onBeforeUnmount(() => {
 
   p {
     margin: 0 0 8px;
-    color: #78837c;
+    color: var(--fg-78837c);
   }
 }
 
@@ -376,10 +376,10 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 12px;
   padding: 3px 0;
-  border-top: 1px solid #f0f3f0;
+  border-top: 1px solid var(--bd-f0f3f0);
 
   span {
-    color: #78837c;
+    color: var(--fg-78837c);
   }
 }
 

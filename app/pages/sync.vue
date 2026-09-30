@@ -751,7 +751,7 @@ async function deleteDevice() {
   display: grid;
   place-items: center;
   color: var(--green);
-  background: #eaf7ef;
+  background: var(--bg-eaf7ef);
   border-radius: 50%;
   font-size: 22px;
 }
@@ -797,21 +797,21 @@ async function deleteDevice() {
   flex: 0 0 28px;
   display: grid;
   place-items: center;
-  background: #fff;
-  border: 1px solid #dce6df;
-  color: #5e6c64;
+  background: var(--bg-ffffff);
+  border: 1px solid var(--bd-dce6df);
+  color: var(--fg-5e6c64);
   border-radius: 5px;
   transition: 0.2s all;
 
   &:hover {
-    background: #f2f6f3;
+    background: var(--bg-f2f6f3);
     color: var(--green);
   }
 
   &.danger:hover {
-    background: #fdf1ef;
-    color: #c65b4d;
-    border-color: #f2d5d0;
+    background: var(--bg-fdf1ef);
+    color: var(--fg-c65b4d);
+    border-color: var(--bd-f2d5d0);
   }
 }
 
@@ -832,7 +832,7 @@ async function deleteDevice() {
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f3f0;
+  border-bottom: 1px solid var(--bd-f0f3f0);
 
   &:last-child {
     border-bottom: 0;
@@ -845,8 +845,8 @@ async function deleteDevice() {
   flex: 0 0 29px;
   display: grid;
   place-items: center;
-  background: #f2f6f3;
-  color: #5e6c64;
+  background: var(--bg-f2f6f3);
+  color: var(--fg-5e6c64);
   border-radius: 8px;
 }
 
@@ -863,7 +863,7 @@ async function deleteDevice() {
 .device-status {
   display: flex;
   align-items: center;
-  color: #43a975;
+  color: var(--fg-43a975);
   font-size: 10px;
   margin-top: 3px;
 
@@ -871,16 +871,16 @@ async function deleteDevice() {
     width: 5px;
     height: 5px;
     display: inline-block;
-    background: #47b87a;
+    background: var(--bg-47b87a);
     border-radius: 50%;
     margin-right: 4px;
   }
 
   &.offline {
-    color: #c07a4e;
+    color: var(--fg-c07a4e);
 
     i {
-      background: #df8a69;
+      background: var(--bg-df8a69);
     }
   }
 }
@@ -893,13 +893,13 @@ async function deleteDevice() {
   white-space: nowrap;
 
   &.owner {
-    color: #22714e;
-    background: #e4f3e9;
+    color: var(--fg-22714e);
+    background: var(--bg-e4f3e9);
   }
 
   &.navigation {
-    color: #5892ac;
-    background: #e4f3f8;
+    color: var(--fg-5892ac);
+    background: var(--bg-e4f3f8);
   }
 }
 
@@ -912,13 +912,13 @@ async function deleteDevice() {
 
 footer {
   text-align: right;
-  color: #adb6b0;
+  color: var(--fg-adb6b0);
   font-size: 10px;
   padding: 19px 0 0;
 
   span {
     margin: 0 5px;
-    color: #d0d6d1;
+    color: var(--fg-d0d6d1);
   }
 }
 
@@ -928,7 +928,7 @@ footer {
 
   > label {
     display: block;
-    color: #506057;
+    color: var(--fg-506057);
     font-size: 11px;
     font-weight: 600;
     margin-bottom: 16px;
@@ -942,7 +942,7 @@ footer {
 }
 
 .field-label {
-  color: #506057;
+  color: var(--fg-506057);
   font-size: 11px;
   font-weight: 600;
   margin: 0 0 8px;
@@ -975,8 +975,8 @@ footer {
   flex: 0 0 32px;
   display: grid;
   place-items: center;
-  background: #fdf1ef;
-  color: #c65b4d;
+  background: var(--bg-fdf1ef);
+  color: var(--fg-c65b4d);
   border: 0;
   border-radius: 5px;
 
@@ -992,7 +992,7 @@ footer {
   gap: 6px;
   background: transparent;
   color: var(--green);
-  border: 1px dashed #b9dcc5;
+  border: 1px dashed var(--bd-b9dcc5);
   border-radius: 5px;
   padding: 9px 12px;
   font-size: 11px;
@@ -1009,13 +1009,13 @@ footer {
 }
 
 .form-error {
-  color: #c65b4d;
+  color: var(--fg-c65b4d);
   font-size: 11px;
   margin: -6px 0 14px;
 }
 
 .delete-confirm-text {
-  color: #506057;
+  color: var(--fg-506057);
   font-size: 12px;
   line-height: 1.6;
   margin: 0 0 20px;

@@ -193,7 +193,7 @@ onUnmounted(() => {
     height: 14px;
     border: 3px solid var(--green);
     border-radius: 50%;
-    background: #fff;
+    background: var(--bg-ffffff);
     box-shadow: 0 0 0 5px rgba(44, 154, 107, 0.1);
 }
 
@@ -203,7 +203,7 @@ onUnmounted(() => {
     width: 14px;
     height: 14px;
     border-radius: 50% 50% 50% 0;
-    background: #df8a69;
+    background: var(--bg-df8a69);
     transform: rotate(-45deg);
     box-shadow: 0 0 0 0 rgba(223, 138, 105, 0.35);
     animation: pin-arrive 3.2s ease-in-out infinite;
@@ -216,7 +216,7 @@ onUnmounted(() => {
         width: 5px;
         height: 5px;
         border-radius: 50%;
-        background: #fff;
+        background: var(--bg-ffffff);
     }
 }
 
@@ -242,7 +242,7 @@ onUnmounted(() => {
         border: 2px solid var(--green);
         border-bottom: 0;
         border-radius: 4px 6px 0 0;
-        background: #dbeee3;
+        background: var(--bg-dbeee3);
     }
 
     &::after {
@@ -251,7 +251,7 @@ onUnmounted(() => {
         inset: 3px 0 0;
         border: 2px solid var(--green);
         border-radius: 3px 5px 3px 3px;
-        background: #fff;
+        background: var(--bg-ffffff);
     }
 }
 
@@ -263,7 +263,7 @@ onUnmounted(() => {
     height: 8px;
     border: 2px solid var(--ink);
     border-radius: 50%;
-    background: #fff;
+    background: var(--bg-ffffff);
 
     &:first-child { left: 4px; }
     &:last-child { right: 4px; }
@@ -278,7 +278,7 @@ onUnmounted(() => {
 }
 
 .loading-label {
-    color: #8a9890;
+    color: var(--fg-8a9890);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1.6px;
@@ -297,9 +297,9 @@ onUnmounted(() => {
     width: min(500px, 100%);
     height: 7px;
     overflow: hidden;
-    border: 1px solid #d6e5db;
+    border: 1px solid var(--bd-d6e5db);
     border-radius: 4px;
-    background: #edf4ef;
+    background: var(--bg-edf4ef);
     box-shadow: inset 0 1px 2px rgba(23, 32, 29, 0.06);
 }
 
@@ -311,7 +311,7 @@ onUnmounted(() => {
     width: 34%;
     height: 100%;
     border-radius: 3px;
-    background: linear-gradient(90deg, #2c9a6b 0%, #65c08d 50%, #2c9a6b 100%);
+    background: linear-gradient(90deg, var(--bg-2c9a6b) 0%, var(--bg-65c08d) 50%, var(--bg-2c9a6b) 100%);
     box-shadow: 0 0 9px rgba(44, 154, 107, 0.28);
     animation: progress-slide 1.8s ease-in-out infinite;
 

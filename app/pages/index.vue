@@ -265,7 +265,7 @@ const deliveries = [
 
 <style lang="scss" scoped>
 .icon-button {
-  color: #829089;
+  color: var(--fg-829089);
   position: relative;
   background: transparent;
   border: 0;
@@ -281,7 +281,7 @@ const deliveries = [
   position: absolute;
   width: 5px;
   height: 5px;
-  background: #e87c64;
+  background: var(--bg-e87c64);
   border-radius: 50%;
   right: 1px;
   top: 3px;
@@ -302,19 +302,19 @@ const deliveries = [
 .metric-card {
   position: relative;
   min-height: 151px;
-  background: #fff;
+  background: var(--bg-ffffff);
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 19px;
   overflow: hidden;
 
   .highlight {
-    background: #eaf7ef;
-    border-color: #d9eee0;
+    background: var(--bg-eaf7ef);
+    border-color: var(--bd-d9eee0);
   }
 
   strong small {
-    color: #859088;
+    color: var(--fg-859088);
     font: 500 13px "DM Sans";
   }
 }
@@ -327,7 +327,7 @@ const deliveries = [
 }
 
 .metric-top {
-  color: #89948d;
+  color: var(--fg-89948d);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.9px;
@@ -335,29 +335,29 @@ const deliveries = [
 
 .metric-icon {
   color: var(--green);
-  background: #d8f0e1;
+  background: var(--bg-d8f0e1);
   border-radius: 5px;
   padding: 5px 6px;
   font-size: 10px;
   font-weight: 700;
 
   .orange {
-    color: #cf8334;
-    background: #fff0da;
+    color: var(--fg-cf8334);
+    background: var(--bg-fff0da);
     font-size: 18px;
     padding: 1px 6px;
   }
 
   .blue {
-    color: #5892ac;
-    background: #e4f3f8;
+    color: var(--fg-5892ac);
+    background: var(--bg-e4f3f8);
     font-size: 18px;
     padding: 1px 6px;
   }
 
   .purple {
-    color: #8e84ac;
-    background: #eeebf6;
+    color: var(--fg-8e84ac);
+    background: var(--bg-eeebf6);
     font-size: 15px;
     padding: 2px 6px;
   }
@@ -374,17 +374,17 @@ const deliveries = [
   z-index: 1;
   justify-content: flex-start;
   gap: 7px;
-  color: #99a39d;
+  color: var(--fg-99a39d);
   font-size: 10px;
 }
 
 .trend {
-  color: #37a36e;
+  color: var(--fg-37a36e);
   font-weight: 700;
 }
 
 .muted-strong {
-  color: #5e6c64;
+  color: var(--fg-5e6c64);
   font-weight: 600;
 }
 
@@ -406,7 +406,7 @@ const deliveries = [
   span {
     width: 9px;
     border-radius: 2px;
-    background: #8bd0a9;
+    background: var(--bg-8bd0a9);
   }
 
   span:nth-child(1) {
@@ -440,7 +440,7 @@ const deliveries = [
 
   i {
     width: 6px;
-    background: #f2c383;
+    background: var(--bg-f2c383);
     border-radius: 2px 2px 0 0;
   }
 
@@ -458,7 +458,7 @@ const deliveries = [
 .distance-line,
 .average-line {
   height: 2px;
-  background: #e4f1f3;
+  background: var(--bg-e4f1f3);
   position: absolute;
   bottom: 25px;
   left: 19px;
@@ -471,15 +471,15 @@ const deliveries = [
   display: block;
   width: 62%;
   height: 2px;
-  background: #9bc4cf;
+  background: var(--bg-9bc4cf);
 }
 
 .average-line {
-  background: #eeeaf6;
+  background: var(--bg-eeeaf6);
 
   span {
     width: 74%;
-    background: #b2a7d4;
+    background: var(--bg-b2a7d4);
   }
 }
 
@@ -514,9 +514,9 @@ const deliveries = [
 
 .select-button,
 .refresh-button {
-  color: #6d7972;
-  background: #f6f8f6;
-  border: 1px solid #e5ebe6;
+  color: var(--fg-6d7972);
+  background: var(--bg-f6f8f6);
+  border: 1px solid var(--bd-e5ebe6);
   border-radius: 4px;
 }
 
@@ -533,12 +533,12 @@ const deliveries = [
   display: flex;
   gap: 23px;
   margin: 29px 0 13px 34px;
-  color: #758079;
+  color: var(--fg-758079);
   font-size: 10px;
 
   b {
     margin-left: 5px;
-    color: #34433a;
+    color: var(--fg-34433a);
   }
 }
 
@@ -550,10 +550,10 @@ const deliveries = [
   margin-right: 4px;
 
   .green {
-    background: #62bb84;
+    background: var(--bg-62bb84);
   }
   .red {
-    background: #e58579;
+    background: var(--bg-e58579);
   }
 }
 
@@ -567,7 +567,7 @@ const deliveries = [
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  color: #a1aaa4;
+  color: var(--fg-a1aaa4);
   font-size: 9px;
   padding-bottom: 22px;
 }
@@ -581,7 +581,7 @@ const deliveries = [
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px dashed #e8ede9;
+  border-top: 1px dashed var(--bd-e8ede9);
 
   .top {
     top: 0;
@@ -606,7 +606,7 @@ const deliveries = [
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    color: #9ca6a0;
+    color: var(--fg-9ca6a0);
     font-size: 9px;
   }
 }
@@ -629,11 +629,11 @@ const deliveries = [
 }
 
 .green-bar {
-  background: #8bd0a5;
+  background: var(--bg-8bd0a5);
 }
 
 .red-bar {
-  background: #ecaaa0;
+  background: var(--bg-ecaaa0);
 }
 
 .bars .today .green-bar {
@@ -641,7 +641,7 @@ const deliveries = [
 }
 
 .bars .today .red-bar {
-  background: #e87568;
+  background: var(--bg-e87568);
 }
 
 .refresh-button {
@@ -659,7 +659,7 @@ const deliveries = [
   align-items: center;
   gap: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f3f0;
+  border-bottom: 1px solid var(--bd-f0f3f0);
 
   strong,
   div span {
@@ -688,26 +688,26 @@ const deliveries = [
 }
 
 .logo-99 {
-  background: #eef0ff;
-  color: #5266bf;
+  background: var(--bg-eef0ff);
+  color: var(--fg-5266bf);
 }
 
 .logo-ifood {
-  background: #fff0ed;
-  color: #e66c56;
+  background: var(--bg-fff0ed);
+  color: var(--fg-e66c56);
   font-style: italic;
 }
 
 .connected {
   margin-left: auto;
-  color: #43a975;
+  color: var(--fg-43a975);
   font-size: 10px;
 
   i {
     width: 5px;
     height: 5px;
     display: inline-block;
-    background: #47b87a;
+    background: var(--bg-47b87a);
     border-radius: 50%;
     margin-right: 3px;
   }
@@ -717,7 +717,7 @@ const deliveries = [
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f0f9f3;
+  background: var(--bg-f0f9f3);
   padding: 10px;
   border-radius: 4px;
 
@@ -726,7 +726,7 @@ const deliveries = [
   }
 
   p {
-    color: #76927f;
+    color: var(--fg-76927f);
     margin: 3px 0 0;
     font-size: 10px;
   }
@@ -741,9 +741,9 @@ const deliveries = [
   display: block;
   width: 100%;
   margin-top: 13px;
-  background: #fff;
-  border: 1px solid #dce6df;
-  color: #4e695a;
+  background: var(--bg-ffffff);
+  border: 1px solid var(--bd-dce6df);
+  color: var(--fg-4e695a);
   border-radius: 4px;
   padding: 9px;
   text-align: left;
@@ -780,16 +780,16 @@ table {
 
 th {
   text-align: left;
-  color: #a0aaa4;
+  color: var(--fg-a0aaa4);
   font-size: 9px;
   letter-spacing: 0.8px;
   padding: 0 10px 12px;
 }
 
 td {
-  border-top: 1px solid #edf1ee;
+  border-top: 1px solid var(--bd-edf1ee);
   padding: 13px 10px;
-  color: #78837c;
+  color: var(--fg-78837c);
   font-size: 11px;
   white-space: nowrap;
 }
@@ -804,23 +804,23 @@ td {
 }
 
 .app-99 {
-  background: #eef0ff;
-  color: #5667b9;
+  background: var(--bg-eef0ff);
+  color: var(--fg-5667b9);
 }
 
 .app-ifood {
-  background: #fff0ed;
-  color: #e06b57;
+  background: var(--bg-fff0ed);
+  color: var(--fg-e06b57);
   font-style: italic;
 }
 
 .route-cell {
-  color: #48564e;
+  color: var(--fg-48564e);
   font-weight: 600;
 }
 
 .value-cell {
-  color: #394a40;
+  color: var(--fg-394a40);
   font-weight: 700;
 }
 
@@ -837,31 +837,31 @@ td {
     margin-right: 5px;
   }
   .in-progress {
-    color: #c77b2d;
-    background: #fff4e4;
+    color: var(--fg-c77b2d);
+    background: var(--bg-fff4e4);
   }
   .in-progress i {
-    background: #efa04e;
+    background: var(--bg-efa04e);
   }
   .done {
-    color: #44956c;
-    background: #edf8f0;
+    color: var(--fg-44956c);
+    background: var(--bg-edf8f0);
   }
   .done i {
-    background: #55b47a;
+    background: var(--bg-55b47a);
   }
 }
 
 footer {
   text-align: right;
-  color: #adb6b0;
+  color: var(--fg-adb6b0);
   font-size: 10px;
   padding: 19px 0 0;
 }
 
 footer span {
   margin: 0 5px;
-  color: #d0d6d1;
+  color: var(--fg-d0d6d1);
 }
 
 @media (max-width: 1050px) {

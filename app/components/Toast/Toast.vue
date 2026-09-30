@@ -137,22 +137,22 @@ watch(
 
 .app-toast.success {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%);
-  color: #ffffff;
+  color: var(--fg-ffffff);
 }
 
 .app-toast.error {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.95) 100%);
-  color: #ffffff;
+  color: var(--fg-ffffff);
 }
 
 .app-toast.warn {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%);
-  color: #ffffff;
+  color: var(--fg-ffffff);
 }
 
 .app-toast.info {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(37, 99, 235, 0.95) 100%);
-  color: #ffffff;
+  color: var(--fg-ffffff);
 }
 
 .toast-icon-wrapper {
@@ -229,7 +229,7 @@ watch(
 .toast-close-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
+  color: var(--fg-ffffff);
   width: 32px;
   height: 32px;
   border-radius: 8px;

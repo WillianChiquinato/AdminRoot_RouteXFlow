@@ -16,12 +16,45 @@
       <span>route<span class="brand-accent">X</span>flow</span>
     </div>
     <div class="profile-card">
-      <div class="avatar">WSC</div>
+      <div class="avatar">{{ userInitials }}</div>
       <div>
-        <strong>Willian de Sena Chiquinato</strong
+        <strong>{{ userName }}</strong
         ><span>Administrador · Mauá, SP</span>
       </div>
-      <button class="more-button" aria-label="Mais opções">•••</button>
+      <button
+        class="more-button"
+        aria-label="Mais opções"
+        aria-haspopup="menu"
+        :aria-expanded="isMenuOpen"
+        @click.stop="isMenuOpen = !isMenuOpen"
+      >
+        •••
+      </button>
+      <Transition name="menu-pop">
+        <div v-if="isMenuOpen" class="profile-menu" role="menu" @click.stop>
+          <div class="profile-menu-header">
+            <strong>{{ userName }}</strong>
+            <span v-if="user?.email">{{ user.email }}</span>
+            <span v-if="user?.phoneNumber">{{ user.phoneNumber }}</span>
+          </div>
+          <NuxtLink to="/settings" class="profile-menu-item" role="menuitem">
+            <component class="profile-menu-icon" :is="User" />
+            <span>Meu perfil</span>
+          </NuxtLink>
+          <NuxtLink to="/settings" class="profile-menu-item" role="menuitem">
+            <component class="profile-menu-icon" :is="Settings" />
+            <span>Configurações</span>
+          </NuxtLink>
+          <button class="profile-menu-item" role="menuitem" @click="toggleTheme">
+            <component class="profile-menu-icon" :is="theme === 'dark' ? Sun : Moon" />
+            <span>{{ theme === "dark" ? "Tema claro" : "Tema escuro" }}</span>
+          </button>
+          <button class="profile-menu-item danger" role="menuitem" @click="logout">
+            <component class="profile-menu-icon" :is="LogOut" />
+            <span>Sair</span>
+          </button>
+        </div>
+      </Transition>
     </div>
     <nav class="main-nav" aria-label="Navegação principal">
       <p class="nav-label">OPERAÇÃO</p>
@@ -39,12 +72,16 @@
         <span v-if="item.badge" class="nav-badge">{{ item.badge }}</span>
       </NuxtLink>
       <p class="nav-label nav-label-spaced">CONTA</p>
-      <button class="nav-item">
+      <NuxtLink
+        to="/settings"
+        class="nav-item"
+        :class="{ active: route.path === '/settings' }"
+      >
         <span class="nav-icon"
           ><component class="nav-icon-component" :is="Settings"
         /></span>
         <span>Configurações</span>
-      </button>
+      </NuxtLink>
     </nav>
     <div class="sidebar-bottom">
       <div class="support-box">
@@ -76,22 +113,62 @@ import {
   CircleQuestionMark,
   Menu,
   X,
+  User,
+  Sun,
+  Moon,
 } from "@lucide/vue";
 import { logout as logoutUser } from "~/composable/useAuth";
+import { useTheme } from "~/composable/useTheme";
+import type { IUserProfile } from "~/infra/interfaces/services/user";
 
 const route = useRoute();
 const isOpen = ref(false);
 
+const user = useState<IUserProfile | null>("auth-user", () => null);
+const userName = computed(() => user.value?.name || "Minha conta");
+const userInitials = computed(() => {
+  const initials = (user.value?.name ?? "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+  return initials || "RX";
+});
+
+const isMenuOpen = ref(false);
+const { theme, setTheme } = useTheme();
+
+function toggleTheme() {
+  setTheme(theme.value === "dark" ? "light" : "dark");
+  isMenuOpen.value = false;
+}
+
 watch(
   () => route.path,
-  () => (isOpen.value = false),
+  () => {
+    isOpen.value = false;
+    isMenuOpen.value = false;
+  },
 );
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === "Escape") isOpen.value = false;
+  if (e.key === "Escape") {
+    isOpen.value = false;
+    isMenuOpen.value = false;
+  }
 }
-onMounted(() => window.addEventListener("keydown", onKeydown));
-onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
+function closeMenu() {
+  isMenuOpen.value = false;
+}
+onMounted(() => {
+  window.addEventListener("keydown", onKeydown);
+  window.addEventListener("click", closeMenu);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", onKeydown);
+  window.removeEventListener("click", closeMenu);
+});
 const navigation = [
   { label: "Visão geral", icon: LayoutDashboard, to: "/" },
   { label: "Sincronizar", icon: RefreshCw, badge: "2", to: "/sync" },
@@ -116,7 +193,7 @@ async function logout() {
   max-height: 100vh;
   overflow-y: auto;
   background: var(--sidebar);
-  border-right: 1px solid #e8ede9;
+  border-right: 1px solid var(--bd-e8ede9);
   padding: 28px 16px 20px;
   display: flex;
   flex-direction: column;
@@ -169,8 +246,8 @@ async function logout() {
   align-items: center;
   gap: 10px;
   padding: 13px 11px;
-  background: #fff;
-  border: 1px solid #e9eeea;
+  background: var(--bg-ffffff);
+  border: 1px solid var(--bd-e9eeea);
   border-radius: 8px;
   margin-bottom: 30px;
 
@@ -193,8 +270,8 @@ async function logout() {
 .avatar {
   width: 45px;
   height: 35px;
-  background: #dbeee3;
-  color: #2e795a;
+  background: var(--bg-dbeee3);
+  color: var(--fg-2e795a);
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -205,13 +282,106 @@ async function logout() {
 .more-button {
   margin-left: auto;
   background: transparent;
-  color: #a4aea8;
+  color: var(--fg-a4aea8);
   letter-spacing: 1px;
   border: 0;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 4px 6px;
+
+  &:hover {
+    background: var(--bg-edf3ef);
+    color: var(--fg-1f4a38);
+  }
+}
+
+.profile-card {
+  position: relative;
+}
+
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--bg-ffffff);
+  border: 1px solid var(--bd-e9eeea);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #17201d1f;
+  padding: 6px;
+}
+
+.profile-menu-header {
+  padding: 8px 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--bd-e9eeea);
+
+  strong {
+    font-size: 12px;
+  }
+
+  span {
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.profile-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--fg-727e77);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
+  span {
+    margin: 0;
+    color: inherit;
+    font-size: 12px;
+  }
+
+  &:hover {
+    background: var(--bg-edf3ef);
+    color: var(--fg-1f4a38);
+  }
+
+  &.danger:hover {
+    color: #c0392b;
+  }
+}
+
+.profile-menu-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.menu-pop-enter-active,
+.menu-pop-leave-active {
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+.menu-pop-enter-from,
+.menu-pop-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 .nav-label {
-  color: #a1aba5;
+  color: var(--fg-a1aba5);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.3px;
@@ -229,7 +399,7 @@ async function logout() {
   gap: 13px;
   align-items: center;
   padding: 11px 13px;
-  color: #727e77;
+  color: var(--fg-727e77);
   background: transparent;
   border: 0;
   border-radius: 6px;
@@ -242,15 +412,15 @@ async function logout() {
     transform 0.2s ease;
 
   &:hover {
-    background: #edf3ef;
-    color: #1f4a38;
+    background: var(--bg-edf3ef);
+    color: var(--fg-1f4a38);
     transform: translateX(2px);
   }
 }
 
 .nav-item.active {
-  color: #22714e;
-  background: #e4f3e9;
+  color: var(--fg-22714e);
+  background: var(--bg-e4f3e9);
   font-weight: 600;
 }
 
@@ -267,8 +437,8 @@ async function logout() {
 
 .nav-badge {
   margin-left: auto;
-  background: #d2eddd;
-  color: #26845b;
+  background: var(--bg-d2eddd);
+  color: var(--fg-26845b);
   border-radius: 10px;
   padding: 2px 7px;
   font-size: 10px;
@@ -282,7 +452,7 @@ async function logout() {
   display: flex;
   gap: 9px;
   align-items: center;
-  border-top: 1px solid #e3e9e4;
+  border-top: 1px solid var(--bd-e3e9e4);
   padding: 22px 5px 18px;
   border-radius: 8px;
   transition:
@@ -302,14 +472,14 @@ async function logout() {
   }
 
   &:hover {
-    background: #edf3ef;
-    color: #1f4a38;
+    background: var(--bg-edf3ef);
+    color: var(--fg-1f4a38);
   }
 
   .arrow {
     margin-left: auto;
     font-size: 15px;
-    color: #a4ada7;
+    color: var(--fg-a4ada7);
   }
 }
 
@@ -317,7 +487,7 @@ async function logout() {
   display: flex;
   align-items: center;
   flex-direction: row;
-  color: #87918b;
+  color: var(--fg-87918b);
   background: transparent;
   border: 0;
   padding: 10px 10px 0;
@@ -328,8 +498,8 @@ async function logout() {
     color 0.2s ease;
 
   &:hover {
-    background: #edf3ef;
-    color: #1f4a38;
+    background: var(--bg-edf3ef);
+    color: var(--fg-1f4a38);
   }
 
   span {
@@ -359,7 +529,7 @@ async function logout() {
     height: 40px;
     display: grid;
     place-items: center;
-    background: #fff;
+    background: var(--bg-ffffff);
     color: var(--ink);
     border: 1px solid var(--line);
     border-radius: 8px;

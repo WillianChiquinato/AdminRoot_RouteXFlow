@@ -92,9 +92,9 @@
             </div>
             <div class="stat">
               <span class="detail-label">Distância</span>
-              <strong>{{ routeDetail.totalDistanceKm.toFixed(1) }} km</strong>
+              <strong>{{ formatDistance(routeDetail.totalDistanceKm) }}</strong>
               <small v-if="routeDetail.plannedDistanceKm !== null"
-                >previsto {{ routeDetail.plannedDistanceKm.toFixed(1) }} km</small
+                >previsto {{ formatDistance(routeDetail.plannedDistanceKm) }}</small
               >
             </div>
             <div class="stat">
@@ -264,7 +264,7 @@
                   }}</span>
                 </td>
                 <td>{{ route.stopsCompletedCount }} / {{ route.stopsCount }}</td>
-                <td>{{ route.totalDistanceKm.toFixed(1) }} km</td>
+                <td>{{ formatDistance(route.totalDistanceKm) }}</td>
                 <td>{{ minutesLabel(route.totalMinutes) }}</td>
                 <td>
                   <span
@@ -339,19 +339,6 @@ function toIsoDate(date: Date) {
     date.getMonth(),
     date.getDate(),
   ).toISOString();
-}
-
-function formatDateTime(value: string | null) {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 function minutesLabel(total: number) {
@@ -535,20 +522,20 @@ onMounted(() => {
   }
 
   &.done {
-    color: #44956c;
-    background: #edf8f0;
+    color: var(--fg-44956c);
+    background: var(--bg-edf8f0);
 
     i {
-      background: #55b47a;
+      background: var(--bg-55b47a);
     }
   }
 
   &.in-progress {
-    color: #c77b2d;
-    background: #fff4e4;
+    color: var(--fg-c77b2d);
+    background: var(--bg-fff4e4);
 
     i {
-      background: #efa04e;
+      background: var(--bg-efa04e);
     }
   }
 }
@@ -560,13 +547,13 @@ onMounted(() => {
   font-weight: 700;
 
   &.delivery {
-    color: #22714e;
-    background: #e4f3e9;
+    color: var(--fg-22714e);
+    background: var(--bg-e4f3e9);
   }
 
   &.marketplace {
-    color: #3c5fa8;
-    background: #e6edfa;
+    color: var(--fg-3c5fa8);
+    background: var(--bg-e6edfa);
   }
 }
 
@@ -586,7 +573,7 @@ onMounted(() => {
 
   label {
     display: block;
-    color: #506057;
+    color: var(--fg-506057);
     font-size: 11px;
     font-weight: 600;
   }
@@ -677,26 +664,26 @@ onMounted(() => {
     border-radius: 50%;
 
     &.planned {
-      background: #2b7fff;
+      background: var(--bg-2b7fff);
       border-radius: 2px;
     }
 
     &.traveled {
-      background: #26845b;
+      background: var(--bg-26845b);
       border-radius: 2px;
     }
 
     &.origin {
-      background: #22714e;
+      background: var(--bg-22714e);
     }
 
     &.destination {
-      background: #c0503a;
+      background: var(--bg-c0503a);
       border-radius: 2px;
     }
 
     &.stop {
-      border: 2px solid #5e6c64;
+      border: 2px solid var(--bd-5e6c64);
     }
   }
 }
@@ -707,7 +694,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 10px;
   font-size: 12px;
-  border-top: 1px solid #f0f3f0;
+  border-top: 1px solid var(--bd-f0f3f0);
   padding-top: 12px;
 
   > div {
@@ -724,7 +711,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  border: 1px dashed #d7e2da;
+  border: 1px dashed var(--bd-d7e2da);
   border-radius: 8px;
   color: var(--muted);
   font-size: 11px;
@@ -747,7 +734,7 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   padding: 12px 0;
-  border-top: 1px solid #f0f3f0;
+  border-top: 1px solid var(--bd-f0f3f0);
 
   &:first-child {
     border-top: 0;
@@ -762,8 +749,8 @@ onMounted(() => {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #f2f6f3;
-  color: #5e6c64;
+  background: var(--bg-f2f6f3);
+  color: var(--fg-5e6c64);
   font-size: 11px;
   font-weight: 700;
 }
@@ -773,13 +760,13 @@ onMounted(() => {
 
   &.active .stop-number {
     background: var(--green);
-    color: #fff;
+    color: var(--fg-ffffff);
   }
 }
 
 .stop-item.concluído .stop-number {
-  background: #e4f3e9;
-  color: #22714e;
+  background: var(--bg-e4f3e9);
+  color: var(--fg-22714e);
 }
 
 .stop-body {
@@ -812,8 +799,8 @@ onMounted(() => {
 }
 
 .stop-type {
-  background: #f2f6f3;
-  color: #5e6c64;
+  background: var(--bg-f2f6f3);
+  color: var(--fg-5e6c64);
   border-radius: 20px;
   padding: 2px 8px;
   font-size: 9px;
@@ -826,7 +813,7 @@ onMounted(() => {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: #5e6c64;
+  color: var(--fg-5e6c64);
 }
 
 .stop-notes {
@@ -860,7 +847,7 @@ onMounted(() => {
 
   th {
     text-align: left;
-    color: #a0aaa4;
+    color: var(--fg-a0aaa4);
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
@@ -869,15 +856,15 @@ onMounted(() => {
   }
 
   td {
-    border-top: 1px solid #edf1ee;
+    border-top: 1px solid var(--bd-edf1ee);
     padding: 13px 10px;
-    color: #78837c;
+    color: var(--fg-78837c);
     font-size: 11px;
     white-space: nowrap;
   }
 
   tr.selected td {
-    background: #f6faf7;
+    background: var(--bg-f6faf7);
   }
 }
 
@@ -887,27 +874,27 @@ onMounted(() => {
   flex: 0 0 28px;
   display: grid;
   place-items: center;
-  background: #fff;
-  border: 1px solid #dce6df;
-  color: #5e6c64;
+  background: var(--bg-ffffff);
+  border: 1px solid var(--bd-dce6df);
+  color: var(--fg-5e6c64);
   border-radius: 5px;
   transition: 0.2s all;
 
   &:hover {
-    background: #f2f6f3;
+    background: var(--bg-f2f6f3);
     color: var(--green);
   }
 }
 
 footer {
   text-align: right;
-  color: #adb6b0;
+  color: var(--fg-adb6b0);
   font-size: 10px;
   padding: 19px 0 0;
 
   span {
     margin: 0 5px;
-    color: #d0d6d1;
+    color: var(--fg-d0d6d1);
   }
 }
 

@@ -5,8 +5,9 @@ import type { ApiResponse } from "~/infra/responses/APIResponse";
 export type WorkSessionStatus = "open" | "closed";
 
 export interface IWorkSessionRequest {
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
+  address: string;
 }
 
 export interface IWorkSessionFilter {

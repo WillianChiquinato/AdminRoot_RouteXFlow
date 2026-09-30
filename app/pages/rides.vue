@@ -150,10 +150,10 @@
             <p class="offer-description">{{ offer.description }}</p>
             <div class="offer-meta">
               <span>{{ formatCurrency(offer.value + offer.bonusValue) }}</span>
-              <span>{{ offer.totalDistanceKm }} km</span>
+              <span>{{ formatDistance(offer.totalDistanceKm) }}</span>
               <span>{{ offer.estimatedMinutes }} min</span>
               <span v-if="offer.routeEvaluation"
-                >{{ formatCurrency(offer.routeEvaluation.valuePerKm) }}/km</span
+                >{{ formatValuePerDistance(offer.routeEvaluation.valuePerKm) }}</span
               >
             </div>
             <div class="offer-stops">
@@ -328,10 +328,10 @@
             <p class="offer-description">{{ offer.description }}</p>
             <div class="offer-meta">
               <span>{{ formatCurrency(offer.value + offer.bonusValue) }}</span>
-              <span>{{ offer.totalDistanceKm }} km</span>
+              <span>{{ formatDistance(offer.totalDistanceKm) }}</span>
               <span>{{ offer.estimatedMinutes }} min</span>
               <span v-if="offer.routeEvaluation"
-                >{{ formatCurrency(offer.routeEvaluation.valuePerKm) }}/km</span
+                >{{ formatValuePerDistance(offer.routeEvaluation.valuePerKm) }}</span
               >
             </div>
             <div class="offer-stops">
@@ -409,6 +409,7 @@ function toIsoDate(date: Date) {
 function getCurrentPosition(): Promise<{
   latitude: number;
   longitude: number;
+  address: string;
 }> {
   return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
@@ -417,10 +418,12 @@ function getCurrentPosition(): Promise<{
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        const { latitude, longitude } = position.coords;
         resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude,
+          longitude,
+          address: await reverseGeocode(latitude, longitude),
         });
       },
       () => {
@@ -534,8 +537,9 @@ async function startRide() {
     const position = await getCurrentPosition();
     const { $httpClient } = useNuxtApp();
     const response = await $httpClient.workSession.StartWorkSession({
-      latitude: position.latitude,
-      longitude: position.longitude,
+      latitude: position.latitude.toString(),
+      longitude: position.longitude.toString(),
+      address: position.address,
     });
 
     if (!response.success) {
@@ -567,7 +571,7 @@ async function finishRide() {
     const { $httpClient } = useNuxtApp();
     const response = await $httpClient.workSession.FinishWorkSession(
       activeSession.value.id,
-      { latitude: position.latitude, longitude: position.longitude },
+      { latitude: position.latitude.toString(), longitude: position.longitude.toString(), address: position.address },
     );
 
     if (!response.success) {
@@ -769,20 +773,20 @@ onUnmounted(() => {
   }
 
   &.done {
-    color: #44956c;
-    background: #edf8f0;
+    color: var(--fg-44956c);
+    background: var(--bg-edf8f0);
 
     i {
-      background: #55b47a;
+      background: var(--bg-55b47a);
     }
   }
 
   &.in-progress {
-    color: #c77b2d;
-    background: #fff4e4;
+    color: var(--fg-c77b2d);
+    background: var(--bg-fff4e4);
 
     i {
-      background: #efa04e;
+      background: var(--bg-efa04e);
     }
   }
 }
@@ -814,7 +818,7 @@ onUnmounted(() => {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-top: 1px solid #f0f3f0;
+  border-top: 1px solid var(--bd-f0f3f0);
 
   &:first-of-type {
     border-top: 0;
@@ -833,8 +837,8 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f2f6f3;
-    color: #5e6c64;
+    background: var(--bg-f2f6f3);
+    color: var(--fg-5e6c64);
     border-radius: 8px;
   }
 
@@ -850,7 +854,7 @@ onUnmounted(() => {
     margin-top: 3px;
 
     &.inactive {
-      color: #c07a4e;
+      color: var(--fg-c07a4e);
     }
   }
 }
@@ -869,13 +873,13 @@ onUnmounted(() => {
   white-space: nowrap;
 
   &.ok {
-    color: #22714e;
-    background: #e4f3e9;
+    color: var(--fg-22714e);
+    background: var(--bg-e4f3e9);
   }
 
   &.warn {
-    color: #c07a4e;
-    background: #fbe9df;
+    color: var(--fg-c07a4e);
+    background: var(--bg-fbe9df);
   }
 }
 
@@ -916,7 +920,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  border: 1px dashed #d7e2da;
+  border: 1px dashed var(--bd-d7e2da);
   border-radius: 8px;
   color: var(--muted);
   font-size: 11px;
@@ -963,7 +967,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   font-size: 12px;
   font-weight: 600;
-  color: #48564e;
+  color: var(--fg-48564e);
   margin-bottom: 10px;
 }
 
@@ -971,7 +975,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border-top: 1px solid #f0f3f0;
+  border-top: 1px solid var(--bd-f0f3f0);
   padding-top: 10px;
 }
 
@@ -980,13 +984,13 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: #5e6c64;
+  color: var(--fg-5e6c64);
 }
 
 .stop-type {
   flex: 0 0 auto;
-  background: #f2f6f3;
-  color: #5e6c64;
+  background: var(--bg-f2f6f3);
+  color: var(--fg-5e6c64);
   border-radius: 20px;
   padding: 2px 8px;
   font-size: 9px;
@@ -1011,7 +1015,7 @@ onUnmounted(() => {
 
   label {
     display: block;
-    color: #506057;
+    color: var(--fg-506057);
     font-size: 11px;
     font-weight: 600;
   }
@@ -1046,7 +1050,7 @@ onUnmounted(() => {
 
   th {
     text-align: left;
-    color: #a0aaa4;
+    color: var(--fg-a0aaa4);
     font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
@@ -1055,9 +1059,9 @@ onUnmounted(() => {
   }
 
   td {
-    border-top: 1px solid #edf1ee;
+    border-top: 1px solid var(--bd-edf1ee);
     padding: 13px 10px;
-    color: #78837c;
+    color: var(--fg-78837c);
     font-size: 11px;
     white-space: nowrap;
   }
@@ -1069,27 +1073,27 @@ onUnmounted(() => {
   flex: 0 0 28px;
   display: grid;
   place-items: center;
-  background: #fff;
-  border: 1px solid #dce6df;
-  color: #5e6c64;
+  background: var(--bg-ffffff);
+  border: 1px solid var(--bd-dce6df);
+  color: var(--fg-5e6c64);
   border-radius: 5px;
   transition: 0.2s all;
 
   &:hover {
-    background: #f2f6f3;
+    background: var(--bg-f2f6f3);
     color: var(--green);
   }
 }
 
 footer {
   text-align: right;
-  color: #adb6b0;
+  color: var(--fg-adb6b0);
   font-size: 10px;
   padding: 19px 0 0;
 
   span {
     margin: 0 5px;
-    color: #d0d6d1;
+    color: var(--fg-d0d6d1);
   }
 }
 

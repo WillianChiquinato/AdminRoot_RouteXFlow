@@ -6,7 +6,19 @@ export default defineNuxtConfig({
     asyncContext: true
   },
   modules: ['@pinia/nuxt'],
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/theme.css', '~/assets/css/main.css'],
+  app: {
+    head: {
+      script: [
+        {
+          // Aplica o tema da sessão antes da hidratação para evitar flash de tema errado.
+          innerHTML:
+            "try{if(sessionStorage.getItem('rxf-theme')==='dark')document.documentElement.classList.add('app-dark')}catch(e){}",
+          tagPosition: 'head',
+        },
+      ],
+    },
+  },
   vite: {
     // O pré-bundle do Vite quebra o web worker do MapLibre (maplibre-gl-worker.mjs).
     optimizeDeps: {

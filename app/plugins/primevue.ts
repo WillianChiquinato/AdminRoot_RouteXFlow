@@ -15,7 +15,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     theme: {
       preset: Lara,
       options: {
-        darkModeSelector: false,
+        darkModeSelector: ".app-dark",
         cssLayer: {
           name: "primevue",
           order: "tailwind-base, primevue, tailwind-utilities",

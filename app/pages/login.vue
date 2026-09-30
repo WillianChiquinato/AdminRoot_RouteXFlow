@@ -355,7 +355,6 @@ async function login() {
       return;
     }
 
-    setLoggedUser(response.result);
     toast.success("Login realizado com sucesso");
     await new Promise((resolve) => setTimeout(resolve, 300));
     await navigateTo("/");
@@ -524,11 +523,11 @@ async function forgotPassword() {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
-  background: #fff;
+  background: var(--bg-ffffff);
 }
 
 .login-brand-panel {
-  background: #eaf7ef;
+  background: var(--bg-eaf7ef);
   padding: 42px 9%;
   display: flex;
   flex-direction: column;
@@ -541,7 +540,7 @@ async function forgotPassword() {
   position: absolute;
   width: 440px;
   height: 440px;
-  border: 1px solid #c8e8d3;
+  border: 1px solid var(--bd-c8e8d3);
   border-radius: 50%;
   right: -190px;
   bottom: -180px;
@@ -612,7 +611,7 @@ async function forgotPassword() {
 
 .login-pitch > p:not(.eyebrow) {
   max-width: 385px;
-  color: #6a8273;
+  color: var(--fg-6a8273);
   line-height: 1.7;
   font-size: 14px;
 }
@@ -632,7 +631,7 @@ async function forgotPassword() {
     font-size: 12px;
   }
   small {
-    color: #7c9785;
+    color: var(--fg-7c9785);
     font-size: 10px;
     margin-top: 4px;
   }
@@ -642,13 +641,13 @@ async function forgotPassword() {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 3px solid #fff;
+  border: 3px solid var(--bd-ffffff);
   box-shadow: 0 0 0 2px var(--green);
 }
 
 .finish {
   box-shadow: 0 0 0 2px #e58b6e;
-  background: #e58b6e;
+  background: var(--bg-e58b6e);
 }
 
 .start {
@@ -658,16 +657,16 @@ async function forgotPassword() {
 
 .route-line {
   width: 55px;
-  border-top: 1px dashed #89b99a;
+  border-top: 1px dashed var(--bd-89b99a);
 }
 
 .route-line-variant {
   width: 35px;
-  border-top: 1px dashed #e58b6e;
+  border-top: 1px dashed var(--bd-e58b6e);
 }
 
 .login-footer {
-  color: #78a088;
+  color: var(--fg-78a088);
   font-size: 10px;
 
   span {
@@ -708,7 +707,7 @@ async function forgotPassword() {
 .auth-tabs {
   :deep(.p-tablist) {
     margin-bottom: 28px;
-    border-bottom: 1px solid #e5ece7;
+    border-bottom: 1px solid var(--bd-e5ece7);
   }
 
   :deep(.p-tablist-tab-list) {
@@ -720,7 +719,7 @@ async function forgotPassword() {
     margin-right: 24px;
     font-size: 12px;
     font-weight: 700;
-    color: #9aa79f;
+    color: var(--fg-9aa79f);
     background: transparent;
     border: none;
   }
@@ -743,7 +742,7 @@ async function forgotPassword() {
 .login-form-panel form > label,
 .login-form-panel form > .field-row > label {
   display: block;
-  color: #506057;
+  color: var(--fg-506057);
   font-size: 11px;
   font-weight: 600;
   margin-bottom: 18px;
@@ -766,7 +765,7 @@ async function forgotPassword() {
   width: 100%;
   margin-top: 8px;
   padding: 13px 14px;
-  border: 1px solid #dfe8e1;
+  border: 1px solid var(--bd-dfe8e1);
   border-radius: 5px;
   outline: none;
   color: var(--ink);
@@ -789,7 +788,7 @@ async function forgotPassword() {
 
   &:deep(.p-select),
   &:deep(.p-multiselect) {
-    border: 1px solid #dfe8e1;
+    border: 1px solid var(--bd-dfe8e1);
     border-radius: 5px;
   }
 
@@ -818,7 +817,7 @@ async function forgotPassword() {
     transform: translateY(-50%);
     border: 0;
     background: none;
-    color: #9da9a1;
+    color: var(--fg-9da9a1);
     display: grid;
     place-items: center;
     padding: 4px;
@@ -837,7 +836,7 @@ async function forgotPassword() {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #7b867f;
+  color: var(--fg-7b867f);
 
   span {
     font-size: 12px;
@@ -863,7 +862,7 @@ async function forgotPassword() {
   width: 100%;
   padding: 13px;
   background: var(--green);
-  color: #fff;
+  color: var(--fg-ffffff);
   border: 0;
   border-radius: 5px;
   font-size: 12px;
@@ -877,20 +876,20 @@ async function forgotPassword() {
   }
 
   &:hover {
-    background: #22714e;
+    background: var(--bg-22714e);
     scale: 1.05;
   }
 }
 
 .signup-copy {
   text-align: center;
-  color: #8a958e;
+  color: var(--fg-8a958e);
   font-size: 11px;
   margin-top: 25px;
 }
 
 .form-error {
-  color: #c65b4d;
+  color: var(--fg-c65b4d);
   font-size: 11px;
   margin: -10px 0 15px;
 }
@@ -907,7 +906,7 @@ async function forgotPassword() {
   left: 12%;
   right: 12%;
   text-align: center;
-  color: #b1bab4;
+  color: var(--fg-b1bab4);
   font-size: 10px;
 }
 

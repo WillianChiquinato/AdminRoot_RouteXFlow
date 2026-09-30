@@ -1,6 +1,7 @@
 import type { FetchOptions } from "ofetch";
 import ClientService from "~/infra/ClientService";
 import type { ApiResponse } from "~/infra/responses/APIResponse";
+import type { IUserPreferences, IUserProfile } from "~/infra/interfaces/services/user";
 
 export interface ILogin {
   email: string;
@@ -25,7 +26,8 @@ export interface IAuthMe {
   name: string;
   email: string;
   role: string[];
-  user: IAuth
+  user: IUserProfile,
+  preferences: IUserPreferences,
 }
 
 export interface IForgotPassword {

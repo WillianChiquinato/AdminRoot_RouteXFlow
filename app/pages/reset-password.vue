@@ -180,11 +180,11 @@ async function resetPassword() {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
-  background: #fff;
+  background: var(--bg-ffffff);
 }
 
 .login-brand-panel {
-  background: #eaf7ef;
+  background: var(--bg-eaf7ef);
   padding: 42px 9%;
   display: flex;
   flex-direction: column;
@@ -250,13 +250,13 @@ async function resetPassword() {
 
 .login-pitch > p:not(.eyebrow) {
   max-width: 385px;
-  color: #6a8273;
+  color: var(--fg-6a8273);
   line-height: 1.7;
   font-size: 14px;
 }
 
 .login-footer {
-  color: #78a088;
+  color: var(--fg-78a088);
   font-size: 10px;
 
   span {
@@ -296,7 +296,7 @@ async function resetPassword() {
 
 .login-form-panel form > label {
   display: block;
-  color: #506057;
+  color: var(--fg-506057);
   font-size: 11px;
   font-weight: 600;
   margin-bottom: 18px;
@@ -308,7 +308,7 @@ async function resetPassword() {
   width: 100%;
   margin-top: 8px;
   padding: 13px 14px;
-  border: 1px solid #dfe8e1;
+  border: 1px solid var(--bd-dfe8e1);
   border-radius: 5px;
   outline: none;
   color: var(--ink);
@@ -334,7 +334,7 @@ async function resetPassword() {
     transform: translateY(-50%);
     border: 0;
     background: none;
-    color: #9da9a1;
+    color: var(--fg-9da9a1);
     display: grid;
     place-items: center;
     padding: 4px;
@@ -347,7 +347,7 @@ async function resetPassword() {
   width: 100%;
   padding: 13px;
   background: var(--green);
-  color: #fff;
+  color: var(--fg-ffffff);
   border: 0;
   border-radius: 5px;
   font-size: 12px;
@@ -363,13 +363,13 @@ async function resetPassword() {
   }
 
   &:hover {
-    background: #22714e;
+    background: var(--bg-22714e);
     scale: 1.05;
   }
 }
 
 .form-error {
-  color: #c65b4d;
+  color: var(--fg-c65b4d);
   font-size: 11px;
   margin: -10px 0 15px;
 }
@@ -380,7 +380,7 @@ async function resetPassword() {
   left: 12%;
   right: 12%;
   text-align: center;
-  color: #b1bab4;
+  color: var(--fg-b1bab4);
   font-size: 10px;
 }
 

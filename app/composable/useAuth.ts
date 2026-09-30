@@ -1,18 +1,27 @@
 import { useNuxtApp } from "#app";
-import type { IAuth } from "~/infra/interfaces/services/auth";
+import type { IUserPreferences, IUserProfile } from "~/infra/interfaces/services/user";
+import { usePreferencesStore } from "~/infra/store/preferencesStore";
+import { resetTheme } from "~/composable/useTheme";
 
-const authUser = () => useState<IAuth | null>("auth-user", () => null);
+const authUser = () => useState<IUserProfile | null>("auth-user", () => null);
 
 export function getLoggedUser() {
   return authUser().value;
 }
 
-export function setLoggedUser(user: IAuth | null) {
+export function setLoggedUser(user: IUserProfile | null) {
   authUser().value = user;
+}
+
+export function setPreferences(preferences: IUserPreferences | null) {
+  usePreferencesStore().setPreferences(preferences);
 }
 
 export function clearAuth() {
   setLoggedUser(null);
+  setPreferences(null);
+  // O tema escuro vale só durante a sessão: sem login, volta ao claro.
+  resetTheme();
 }
 
 export async function checkAuth() {
@@ -20,6 +29,7 @@ export async function checkAuth() {
     const { $httpClient } = useNuxtApp();
     const response = await $httpClient.auth.Me();
     setLoggedUser(response.result.user);
+    setPreferences(response.result.preferences);
     return true;
   } catch {
     clearAuth();

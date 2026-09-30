@@ -88,7 +88,7 @@ const section = computed(
   display: grid;
   place-items: center;
   color: var(--green);
-  background: #eaf7ef;
+  background: var(--bg-eaf7ef);
   border-radius: 50%;
   font-size: 22px;
 }
