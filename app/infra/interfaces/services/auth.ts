@@ -87,6 +87,17 @@ export default class AuthService extends ClientService<any> {
     });
   };
 
+  ValidateResetToken = async (
+    token: string,
+    config: FetchOptions = {}
+  ): Promise<ApiResponse<boolean>> => {
+    return await this.fetchInstance(`${this.address}/validate-reset-token`, {
+      method: "GET",
+      query: { token },
+      ...config,
+    });
+  };
+
   ResetPassword = async (
     data: IResetPassword,
     config: FetchOptions = {}

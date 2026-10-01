@@ -24,26 +24,7 @@
           <span>route<span class="brand-accent">X</span>flow</span>
         </div>
 
-        <template v-if="!token">
-          <p class="eyebrow">LINK INVÁLIDO</p>
-          <h2>Link de redefinição inválido</h2>
-          <p class="form-intro">
-            Este link expirou ou está incompleto. Solicite uma nova recuperação
-            de senha.
-          </p>
-          <NuxtLink class="login-button" to="/login">Voltar ao login</NuxtLink>
-        </template>
-
-        <template v-else-if="resetDone">
-          <p class="eyebrow">TUDO CERTO</p>
-          <h2>Senha redefinida</h2>
-          <p class="form-intro">
-            Sua senha foi alterada com sucesso. Faça login com a nova senha.
-          </p>
-          <NuxtLink class="login-button" to="/login">Ir para o login</NuxtLink>
-        </template>
-
-        <template v-else>
+        <template v-if="status === 'ready'">
           <p class="eyebrow">NOVA SENHA</p>
           <h2>Defina sua nova senha</h2>
           <p class="form-intro">Escolha uma nova senha para sua conta.</p>
@@ -106,13 +87,72 @@
         privacidade.
       </p>
     </section>
+
+    <Dialog
+      :visible="status === 'validating'"
+      modal
+      :closable="false"
+      :draggable="false"
+      :show-header="false"
+      class="reset-dialog"
+      :style="{ width: '380px' }"
+    >
+      <div class="reset-modal">
+        <div class="reset-icon reset-icon--loading">
+          <LoaderCircle :size="30" class="spin" />
+        </div>
+        <h3>Verificando seu link</h3>
+        <p>Estamos conferindo se o link de redefinição ainda é válido.</p>
+      </div>
+    </Dialog>
+
+    <Dialog
+      :visible="status === 'invalid'"
+      modal
+      :closable="false"
+      :draggable="false"
+      :show-header="false"
+      class="reset-dialog"
+      :style="{ width: '400px' }"
+    >
+      <div class="reset-modal">
+        <div class="reset-icon reset-icon--error">
+          <TimerOff v-if="invalidReason === 'expired'" :size="30" />
+          <Lock v-else :size="30" />
+        </div>
+        <h3>{{ invalidReason === "expired" ? "Link expirado" : "Link inválido" }}</h3>
+        <p>{{ invalidMessage }}</p>
+        <NuxtLink class="login-button" to="/login">Voltar ao login</NuxtLink>
+      </div>
+    </Dialog>
+
+    <Dialog
+      :visible="status === 'done'"
+      modal
+      :closable="false"
+      :draggable="false"
+      :show-header="false"
+      class="reset-dialog"
+      :style="{ width: '400px' }"
+    >
+      <div class="reset-modal">
+        <div class="reset-icon reset-icon--success">
+          <ShieldCheck :size="30" />
+        </div>
+        <h3>Senha redefinida</h3>
+        <p>
+          Sua senha foi alterada com sucesso. Faça login com a nova senha para
+          continuar.
+        </p>
+        <NuxtLink class="login-button" to="/login">Ir para o login</NuxtLink>
+      </div>
+    </Dialog>
   </main>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
-import { Eye } from "@lucide/vue";
-import { EyeOff } from "@lucide/vue";
+import { computed, onMounted, reactive, ref } from "vue";
+import { Eye, EyeOff, Lock, LoaderCircle, ShieldCheck, TimerOff } from "@lucide/vue";
 import useLoading from "~/composable/useLoading";
 import { useNuxtApp } from "#app";
 import { useToastService } from "~/composable/useToast";
@@ -128,9 +168,51 @@ const passwordForm = reactive({
   confirmPassword: "",
 });
 const error = ref("");
-const resetDone = ref(false);
+type Status = "validating" | "ready" | "invalid" | "done";
+const status = ref<Status>("validating");
+const invalidReason = ref<"expired" | "invalid">("invalid");
+const invalidMessage = ref("");
 const flagPasswordEye = ref(false);
 const flagConfirmPasswordEye = ref(false);
+
+function isExpired(message?: string) {
+  return !!message && /expirad|expired|prazo/i.test(message);
+}
+
+function markInvalid(reason: "expired" | "invalid", message?: string) {
+  invalidReason.value = reason;
+  invalidMessage.value =
+    message ??
+    (reason === "expired"
+      ? "Este link passou do prazo de 15 minutos. Solicite uma nova recuperação de senha."
+      : "Este link está incompleto ou já foi utilizado. Solicite uma nova recuperação de senha.");
+  status.value = "invalid";
+}
+
+async function validateToken() {
+  if (!token.value) {
+    markInvalid("invalid");
+    return;
+  }
+
+  try {
+    const { $httpClient } = useNuxtApp();
+    const response = await $httpClient.auth.ValidateResetToken(token.value);
+
+    if (response.success && response.result) {
+      status.value = "ready";
+      return;
+    }
+
+    const message = response.errors?.[0];
+    markInvalid(isExpired(message) ? "expired" : "invalid", message);
+  } catch (cause: any) {
+    const message = cause?.errors?.[0];
+    markInvalid(isExpired(message) ? "expired" : "invalid", message);
+  }
+}
+
+onMounted(validateToken);
 
 async function resetPassword() {
   loadingPush();
@@ -158,17 +240,23 @@ async function resetPassword() {
     });
 
     if (!response.success) {
-      toast.error(response.errors[0] ?? "Não foi possível redefinir sua senha.");
+      const message = response.errors[0] ?? "Não foi possível redefinir sua senha.";
+      if (isExpired(message)) markInvalid("expired");
+      else toast.error(message);
       return;
     }
 
-    resetDone.value = true;
+    status.value = "done";
     toast.success("Senha redefinida com sucesso.");
   } catch (cause: any) {
     const message =
       cause?.errors?.[0] ?? "Não foi possível redefinir sua senha. Tente novamente.";
-    error.value = message;
-    toast.error(message);
+    if (isExpired(message)) {
+      markInvalid("expired");
+    } else {
+      error.value = message;
+      toast.error(message);
+    }
   } finally {
     loadingPop();
   }
@@ -382,6 +470,60 @@ async function resetPassword() {
   text-align: center;
   color: var(--fg-b1bab4);
   font-size: 10px;
+}
+
+.reset-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 8px 4px;
+
+  h3 {
+    font: 700 22px "Space Grotesk";
+    letter-spacing: -0.6px;
+    margin: 18px 0 8px;
+  }
+
+  p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  .login-button {
+    width: 100%;
+  }
+}
+
+.reset-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+
+  &--loading,
+  &--success {
+    background: var(--bg-eaf7ef);
+    color: var(--green);
+  }
+
+  &--error {
+    background: #fdecea;
+    color: var(--fg-c65b4d);
+  }
+}
+
+.spin {
+  animation: reset-spin 0.9s linear infinite;
+}
+
+@keyframes reset-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1050px) {
