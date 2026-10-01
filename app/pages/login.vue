@@ -181,7 +181,31 @@
                     display="chip"
                     class="form-dropdown"
                     fluid
-                  />
+                  >
+                    <template #option="{ option }">
+                      <span class="app-option">
+                        <img
+                          v-if="option.iconUrl"
+                          :src="bucketStorageFetch(option.iconUrl)"
+                          :alt="option.name"
+                        />
+                        <span v-else class="app-option-fallback">{{
+                          option.name.slice(0, 2)
+                        }}</span>
+                        {{ option.name }}
+                      </span>
+                    </template>
+                    <template #chip="{ value }">
+                      <span class="app-option">
+                        <img
+                          v-if="appById(value)?.iconUrl"
+                          :src="bucketStorageFetch(appById(value)?.iconUrl)"
+                          :alt="appById(value)?.name"
+                        />
+                        {{ appById(value)?.name }}
+                      </span>
+                    </template>
+                  </MultiSelect>
                 </label>
 
                 <label for="register-password"
@@ -369,6 +393,7 @@ async function login() {
 
 const roles = ref<IRole[]>([]);
 const apps = ref<IApp[]>([]);
+const appById = (id: number) => apps.value.find((app) => app.id === id);
 
 const registerForm = reactive({
   name: "",
@@ -519,6 +544,30 @@ async function forgotPassword() {
 </script>
 
 <style lang="scss" scoped>
+.app-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  img,
+  .app-option-fallback {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    object-fit: cover;
+  }
+
+  .app-option-fallback {
+    display: grid;
+    place-items: center;
+    background: var(--bg-eef0ff);
+    color: var(--fg-5266bf);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+}
+
 .login-page {
   min-height: 100vh;
   display: grid;

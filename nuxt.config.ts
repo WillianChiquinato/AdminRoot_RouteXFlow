@@ -20,6 +20,13 @@ export default defineNuxtConfig({
     },
   },
   vite: {
+    server: {
+      allowedHosts: [
+        '.ngrok-free.dev',
+        '.loca.lt',
+        '.trycloudflare.com',
+      ]
+    },
     // O pré-bundle do Vite quebra o web worker do MapLibre (maplibre-gl-worker.mjs).
     optimizeDeps: {
       exclude: ['maplibre-gl']

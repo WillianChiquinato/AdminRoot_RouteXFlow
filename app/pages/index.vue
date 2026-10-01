@@ -22,7 +22,7 @@
               :stroke-width="1.8"
               aria-hidden="true"
             /><span class="notification-dot"></span></button
-          ><button class="mini-avatar">WSC</button>
+          ><button class="mini-avatar">{{ userInitials }}</button>
         </div>
         <Transition name="notification-pop">
           <div v-if="showNotifications" class="notification-popover">
@@ -33,7 +33,7 @@
       <section class="page-heading">
         <div>
           <p class="eyebrow">{{ getDateNow.toUpperCase() }}</p>
-          <h1>{{ getActiveHours() }}, Willian</h1>
+          <h1>{{ getActiveHours() }}, {{ firstName }}</h1>
           <p class="heading-copy">
             Aqui está o resumo das suas entregas de hoje.
           </p>
@@ -42,14 +42,17 @@
           ><span>↗</span> Sincronizar apps</NuxtLink
         >
       </section>
-      <section class="metric-grid" aria-label="Resumo financeiro">
+      <section class="metric-grid" aria-label="Resumo do dia">
         <article class="metric-card highlight">
           <div class="metric-top">
             <span>GANHOS HOJE</span><span class="metric-icon">R$</span>
           </div>
-          <strong>R$ 86,40</strong>
+          <strong>{{ formatCurrency(today.earnings) }}</strong>
           <div class="metric-bottom">
-            <span class="trend">↗ 12,5%</span><span>vs. ontem</span>
+            <span :class="deltaClass(earningsDelta)">{{
+              deltaLabel(earningsDelta)
+            }}</span
+            ><span>vs. ontem</span>
           </div>
           <div class="sparkline">
             <span></span><span></span><span></span><span></span><span></span
@@ -61,9 +64,12 @@
             <span>CORRIDAS CONCLUÍDAS</span
             ><span class="metric-icon orange">⌁</span>
           </div>
-          <strong>8</strong>
+          <strong>{{ today.rides }}</strong>
           <div class="metric-bottom">
-            <span class="trend">↗ 2 corridas</span><span>vs. ontem</span>
+            <span :class="deltaClass(ridesDelta)"
+              >{{ ridesDelta > 0 ? "↗" : ridesDelta < 0 ? "↘" : "•" }}
+              {{ Math.abs(ridesDelta) }} corridas</span
+            ><span>vs. ontem</span>
           </div>
           <div class="mini-bars">
             <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
@@ -75,19 +81,30 @@
             <span>DISTÂNCIA PERCORRIDA</span
             ><span class="metric-icon blue">⌖</span>
           </div>
-          <strong>42,8 <small>km</small></strong>
+          <strong>{{ formatDistance(today.distanceKm) }}</strong>
           <div class="metric-bottom">
-            <span class="muted-strong">5,3 km</span><span>por corrida</span>
+            <span class="muted-strong">{{
+              formatDistance(today.rides ? today.distanceKm / today.rides : 0)
+            }}</span
+            ><span>por corrida</span>
           </div>
           <div class="distance-line"><span></span></div>
         </article>
         <article class="metric-card">
           <div class="metric-top">
-            <span>TICKET MÉDIO</span><span class="metric-icon purple">◷</span>
+            <span>GANHO POR DISTÂNCIA</span
+            ><span class="metric-icon purple">◷</span>
           </div>
-          <strong>R$ 10,80</strong>
+          <strong>{{
+            formatValuePerDistance(
+              today.distanceKm ? today.earnings / today.distanceKm : 0,
+            )
+          }}</strong>
           <div class="metric-bottom">
-            <span class="trend">↗ R$ 1,20</span><span>vs. ontem</span>
+            <span class="muted-strong">{{
+              formatCurrency(today.rides ? today.earnings / today.rides : 0)
+            }}</span
+            ><span>ticket médio</span>
           </div>
           <div class="average-line"><span></span></div>
         </article>
@@ -96,19 +113,22 @@
         <article class="panel earnings-panel">
           <div class="panel-heading">
             <div>
-              <h2>Ganhos por aplicativo</h2>
+              <h2>Ganhos x Despesas</h2>
               <p>Comparativo dos últimos 7 dias</p>
             </div>
-            <button class="select-button">Esta semana <span>⌄</span></button>
           </div>
           <div class="chart-legend">
-            <span><i class="legend-dot green"></i> 99Food <b>R$ 48,20</b></span
-            ><span><i class="legend-dot red"></i> iFood <b>R$ 38,20</b></span>
+            <span
+              ><i class="legend-dot green"></i> Ganhos
+              <b>{{ formatCurrency(weekTotals.earnings) }}</b></span
+            ><span
+              ><i class="legend-dot red"></i> Despesas
+              <b>{{ formatCurrency(weekTotals.expenses) }}</b></span
+            >
           </div>
           <div class="chart-wrap">
             <div class="y-labels">
-              <span>R$ 60</span><span>R$ 40</span><span>R$ 20</span
-              ><span>R$ 0</span>
+              <span v-for="(label, i) in yLabels" :key="i">{{ label }}</span>
             </div>
             <div class="chart">
               <div class="grid-line top"></div>
@@ -116,18 +136,20 @@
               <div class="grid-line low"></div>
               <div class="bars">
                 <div
-                  v-for="(bar, index) in [42, 57, 35, 72, 60, 78, 82]"
-                  :key="index"
-                  :class="{ today: index === 6 }"
+                  v-for="(day, index) in weekDays"
+                  :key="day.key"
+                  :class="{ today: index === weekDays.length - 1 }"
+                  :title="`Ganhos ${formatCurrency(day.earnings)} · Despesas ${formatCurrency(day.expenses)}`"
                 >
-                  <i class="bar green-bar" :style="{ height: `${bar}%` }"></i
+                  <i
+                    class="bar green-bar"
+                    :style="{ height: `${(day.earnings / chartMax) * 79}%` }"
+                  ></i
                   ><i
                     class="bar red-bar"
-                    :style="{ height: `${bar * 0.68}%` }"
+                    :style="{ height: `${(day.expenses / chartMax) * 79}%` }"
                   ></i
-                  ><small>{{
-                    ["qui", "sex", "sáb", "dom", "seg", "ter", "hoje"][index]
-                  }}</small>
+                  ><small>{{ day.label }}</small>
                 </div>
               </div>
             </div>
@@ -136,38 +158,62 @@
         <article class="panel sync-panel">
           <div class="panel-heading">
             <div>
-              <h2>Sincronização</h2>
-              <p>Status dos seus aplicativos</p>
+              <h2>Turno e dispositivos</h2>
+              <p>Situação do seu turno e containers</p>
             </div>
             <button
               class="refresh-button"
               aria-label="Atualizar status"
-              @click="isOnline = !isOnline"
+              @click="loadDashboard"
             >
               ↻
             </button>
           </div>
           <div class="sync-list">
             <div class="sync-row">
-              <span class="platform-logo logo-99">99</span>
+              <span class="platform-logo logo-99">⏱</span>
               <div>
-                <strong>99Food</strong><span>Última atualização há 2 min</span>
+                <strong>{{
+                  openSession ? "Turno em andamento" : "Nenhum turno aberto"
+                }}</strong
+                ><span>{{
+                  openSession
+                    ? `${openSession.containerName} · desde ${formatDateTime(openSession.startTime)}`
+                    : `${sessions.length} turno(s) hoje`
+                }}</span>
               </div>
-              <span class="connected"><i></i> Conectado</span>
+              <span :class="openSession ? 'connected' : 'idle'"
+                ><i></i> {{ openSession ? "Ativo" : "Parado" }}</span
+              >
             </div>
             <div class="sync-row">
-              <span class="platform-logo logo-ifood">iF</span>
+              <span class="platform-logo logo-ifood">▣</span>
               <div>
-                <strong>iFood</strong><span>Última atualização há 4 min</span>
+                <strong>Containers ativos</strong
+                ><span>{{ activeContainers }} de {{ containers.length }}</span>
               </div>
-              <span class="connected"><i></i> Conectado</span>
+              <span :class="activeContainers ? 'connected' : 'idle'"
+                ><i></i> {{ activeContainers ? "Ativo" : "Inativo" }}</span
+              >
+            </div>
+            <div class="sync-row">
+              <span class="platform-logo logo-99">▤</span>
+              <div>
+                <strong>Dispositivos conectados</strong
+                ><span>{{ connectedDevices }} de {{ totalDevices }}</span>
+              </div>
+              <span :class="connectedDevices ? 'connected' : 'idle'"
+                ><i></i> {{ connectedDevices ? "Conectado" : "Offline" }}</span
+              >
             </div>
           </div>
           <div class="sync-callout">
             <span>✦</span>
             <div>
-              <strong>Pronto para combinar</strong>
-              <p>Seus apps estão ativos e buscando novas corridas.</p>
+              <strong
+                >Saldo do mês: {{ formatCurrency(monthBalance) }}</strong
+              >
+              <p>{{ monthRidesCount }} corridas concluídas neste mês.</p>
             </div>
           </div>
           <NuxtLink class="outline-button" to="/sync"
@@ -189,28 +235,45 @@
           <table>
             <thead>
               <tr>
-                <th>APLICATIVO</th>
+                <th>TIPO</th>
                 <th>ROTA</th>
-                <th>VALOR</th>
                 <th>DISTÂNCIA</th>
+                <th>DURAÇÃO</th>
                 <th>HORÁRIO</th>
                 <th>STATUS</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="delivery in deliveries" :key="delivery.route">
+              <tr v-if="!recentRoutes.length">
+                <td colspan="6">Nenhuma corrida registrada nos últimos 7 dias.</td>
+              </tr>
+              <tr v-for="route in recentRoutes" :key="route.id">
                 <td>
-                  <span :class="['table-app', delivery.appClass]">{{
-                    delivery.app
-                  }}</span>
+                  <span
+                    :class="[
+                      'table-app',
+                      route.type === 'Delivery' ? 'app-99' : 'app-ifood',
+                    ]"
+                    >{{ route.type === "Delivery" ? "DL" : "MP" }}</span
+                  >
                 </td>
-                <td class="route-cell">{{ delivery.route }}</td>
-                <td class="value-cell">{{ delivery.value }}</td>
-                <td>{{ delivery.distance }}</td>
-                <td>{{ delivery.time }}</td>
+                <td class="route-cell">
+                  {{ route.originAddress ?? "—" }} →
+                  {{ route.destinationAddress ?? "—" }}
+                </td>
+                <td>{{ formatDistance(route.totalDistanceKm) }}</td>
+                <td>{{ Math.round(route.totalMinutes) }} min</td>
+                <td>{{ formatDateTime(route.startTime) }}</td>
                 <td>
-                  <span :class="['status-pill', delivery.statusClass]"
-                    ><i></i>{{ delivery.status }}</span
+                  <span
+                    :class="[
+                      'status-pill',
+                      route.status === 'Finished' ? 'done' : 'in-progress',
+                    ]"
+                    ><i></i
+                    >{{
+                      route.status === "Finished" ? "Concluída" : "Em andamento"
+                    }}</span
                   >
                 </td>
               </tr>
@@ -225,42 +288,212 @@
 
 <script setup lang="ts">
 import { Bell } from "@lucide/vue";
+import { useNuxtApp } from "#app";
+import useLoading from "~/composable/useLoading";
+import { useToastService } from "~/composable/useToast";
+import { getLoggedUser } from "~/composable/useAuth";
+import type { IFinanceEntry } from "~/infra/interfaces/services/finance";
+import type { IRouteSummary } from "~/infra/interfaces/services/route";
+import type { IContainer } from "~/infra/interfaces/services/container";
+import type { IWorkSession } from "~/infra/interfaces/services/workSession";
+
+const toast = useToastService();
+const { loadingPush, loadingPop } = useLoading();
+
+const user = getLoggedUser();
+const firstName = computed(() => user?.name?.split(" ")[0] || "Willian");
+const userInitials = computed(() => {
+  const initials = (user?.name ?? "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+  return initials || "WSC";
+});
 
 const isOnline = ref(true);
 const showNotifications = ref(false);
-const deliveries = [
-  {
-    app: "99",
-    appClass: "app-99",
-    route: "Vila Bocaina → Jardim Zaíra",
-    value: "R$ 18,90",
-    distance: "6,4 km",
-    time: "há 8 min",
-    status: "Em andamento",
-    statusClass: "in-progress",
-  },
-  {
-    app: "ifood",
-    appClass: "app-ifood",
-    route: "Parque São Vicente → Itapark",
-    value: "R$ 12,50",
-    distance: "4,1 km",
-    time: "há 22 min",
-    status: "Concluída",
-    statusClass: "done",
-  },
-  {
-    app: "99",
-    appClass: "app-99",
-    route: "Centro → Jardim Miranda",
-    value: "R$ 9,80",
-    distance: "3,8 km",
-    time: "há 41 min",
-    status: "Concluída",
-    statusClass: "done",
-  },
-];
 
+const entries = ref<IFinanceEntry[]>([]);
+const routes = ref<IRouteSummary[]>([]);
+const monthRoutes = ref<IRouteSummary[]>([]);
+const monthBalance = ref(0);
+const containers = ref<IContainer[]>([]);
+const sessions = ref<IWorkSession[]>([]);
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const localKey = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+// Lançamentos financeiros são datas fixas em UTC; rotas usam o dia local.
+const entryKey = (value: string) => value.slice(0, 10);
+const routeKey = (value: string) => localKey(new Date(value));
+
+function startOfDay(offset = 0) {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + offset);
+}
+
+const weekdayLabels = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+
+const weekDays = computed(() =>
+  Array.from({ length: 7 }, (_, i) => {
+    const date = startOfDay(i - 6);
+    const key = localKey(date);
+    const dayEntries = entries.value.filter((e) => entryKey(e.date) === key);
+    const sum = (type: string) =>
+      dayEntries
+        .filter((e) => e.type === type)
+        .reduce((total, e) => total + e.amount, 0);
+    return {
+      key,
+      label: i === 6 ? "hoje" : weekdayLabels[date.getDay()],
+      earnings: sum("earning"),
+      expenses: sum("expense"),
+    };
+  }),
+);
+
+const weekTotals = computed(() => ({
+  earnings: weekDays.value.reduce((t, d) => t + d.earnings, 0),
+  expenses: weekDays.value.reduce((t, d) => t + d.expenses, 0),
+}));
+
+const chartMax = computed(() => {
+  const max = Math.max(
+    ...weekDays.value.flatMap((d) => [d.earnings, d.expenses]),
+    0,
+  );
+  return max > 0 ? max : 1;
+});
+
+const yLabels = computed(() =>
+  [1, 2 / 3, 1 / 3, 0].map((f) =>
+    formatCurrency(Math.round(chartMax.value * f)),
+  ),
+);
+
+function dayStats(offset: number) {
+  const key = localKey(startOfDay(offset));
+  const finished = routes.value.filter(
+    (r) => r.status === "Finished" && routeKey(r.startTime) === key,
+  );
+  return {
+    earnings: entries.value
+      .filter((e) => e.type === "earning" && entryKey(e.date) === key)
+      .reduce((total, e) => total + e.amount, 0),
+    rides: finished.length,
+    distanceKm: finished.reduce((total, r) => total + r.totalDistanceKm, 0),
+  };
+}
+
+const today = computed(() => dayStats(0));
+const yesterday = computed(() => dayStats(-1));
+
+const earningsDelta = computed(() => {
+  if (yesterday.value.earnings > 0) {
+    return (
+      ((today.value.earnings - yesterday.value.earnings) /
+        yesterday.value.earnings) *
+      100
+    );
+  }
+  return today.value.earnings > 0 ? 100 : 0;
+});
+const ridesDelta = computed(() => today.value.rides - yesterday.value.rides);
+
+const deltaClass = (value: number) =>
+  value < 0 ? "trend down" : value > 0 ? "trend" : "muted-strong";
+const deltaLabel = (value: number) =>
+  `${value > 0 ? "↗" : value < 0 ? "↘" : "•"} ${Math.abs(value).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
+
+const recentRoutes = computed(() =>
+  [...routes.value]
+    .sort(
+      (a, b) =>
+        new Date(b.startTime).getTime() - new Date(a.startTime).getTime(),
+    )
+    .slice(0, 5),
+);
+
+const openSession = computed(
+  () => sessions.value.find((s) => !s.endTime) ?? null,
+);
+const activeContainers = computed(
+  () => containers.value.filter((c) => c.isActive).length,
+);
+const allDevices = computed(() => containers.value.flatMap((c) => c.devices));
+const totalDevices = computed(() => allDevices.value.length);
+const connectedDevices = computed(
+  () => allDevices.value.filter((d) => d.connected).length,
+);
+const monthRidesCount = computed(
+  () => monthRoutes.value.filter((r) => r.status === "Finished").length,
+);
+
+async function loadDashboard() {
+  loadingPush();
+  try {
+    const { $httpClient } = useNuxtApp();
+    const now = new Date();
+    const weekStart = startOfDay(-6).toISOString();
+    const todayIso = startOfDay(0).toISOString();
+    const monthStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+    ).toISOString();
+
+    const responses = await Promise.all([
+      $httpClient.finance.FinanceList({
+        startDate: weekStart,
+        endDate: todayIso,
+      }),
+      $httpClient.route.RouteList({ startDate: weekStart, endDate: todayIso }),
+      $httpClient.route.RouteList({
+        startDate: monthStart,
+        endDate: todayIso,
+      }),
+      $httpClient.finance.FinanceSummary({
+        startDate: monthStart,
+        endDate: todayIso,
+      }),
+      $httpClient.container.ContainerList(),
+      $httpClient.workSession.WorkSessionList({
+        startDate: todayIso,
+        endDate: todayIso,
+      }),
+    ]);
+    const [entriesRes, routesRes, monthRoutesRes, summaryRes, containersRes, sessionsRes] =
+      responses;
+
+    const failed = responses.find((r) => !r.success);
+    if (failed) {
+      isOnline.value = false;
+      toast.error(
+        failed.errors[0] ?? "Não foi possível carregar a visão geral.",
+      );
+      return;
+    }
+
+    entries.value = entriesRes.result as IFinanceEntry[];
+    routes.value = routesRes.result as IRouteSummary[];
+    monthRoutes.value = monthRoutesRes.result as IRouteSummary[];
+    monthBalance.value = (summaryRes.result as { balance: number }).balance;
+    containers.value = containersRes.result as IContainer[];
+    sessions.value = sessionsRes.result as IWorkSession[];
+    isOnline.value = true;
+  } catch (cause: any) {
+    isOnline.value = false;
+    toast.error(
+      cause?.errors?.[0] ?? "Não foi possível carregar a visão geral.",
+    );
+  } finally {
+    loadingPop();
+  }
+}
+
+onMounted(loadDashboard);
 </script>
 
 <style lang="scss" scoped>
@@ -381,6 +614,25 @@ const deliveries = [
 .trend {
   color: var(--fg-37a36e);
   font-weight: 700;
+}
+
+.trend.down {
+  color: var(--bg-e87c64);
+}
+
+.idle {
+  margin-left: auto;
+  color: var(--fg-99a39d);
+  font-size: 10px;
+
+  i {
+    width: 5px;
+    height: 5px;
+    display: inline-block;
+    background: var(--fg-99a39d);
+    border-radius: 50%;
+    margin-right: 3px;
+  }
 }
 
 .muted-strong {

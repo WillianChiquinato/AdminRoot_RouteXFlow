@@ -85,11 +85,6 @@
     </nav>
     <div class="sidebar-bottom">
       <div class="support-box">
-        <component class="nav-icon-component" :is="CircleQuestionMark" />
-        <div>
-          <strong>Precisa de ajuda?</strong><span>Fale com o suporte</span>
-        </div>
-        <span class="arrow">→</span>
       </div>
       <button class="logout" @click="logout">
         <span class="nav-icon"
@@ -449,38 +444,8 @@ async function logout() {
 }
 
 .support-box {
-  display: flex;
-  gap: 9px;
-  align-items: center;
   border-top: 1px solid var(--bd-e3e9e4);
-  padding: 22px 5px 18px;
-  border-radius: 8px;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
-
-  strong,
-  span {
-    display: block;
-    font-size: 11px;
-  }
-
-  div span {
-    color: var(--muted);
-    margin-top: 3px;
-    font-size: 10px;
-  }
-
-  &:hover {
-    background: var(--bg-edf3ef);
-    color: var(--fg-1f4a38);
-  }
-
-  .arrow {
-    margin-left: auto;
-    font-size: 15px;
-    color: var(--fg-a4ada7);
-  }
+  margin-bottom: 15px;
 }
 
 .logout {

@@ -5,6 +5,7 @@ import type { ApiResponse } from "~/infra/responses/APIResponse";
 export interface IApp {
   id: number;
   name: string;
+  iconUrl?: string | null;
 }
 
 export default class AppService extends ClientService<any> {
