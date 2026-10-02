@@ -34,9 +34,18 @@ export interface IForgotPassword {
   email: string;
 }
 
+export interface IVerifyEmail {
+  email: string;
+  code: string;
+}
+
+export interface IResendVerification {
+  email: string;
+}
+
 export interface IResetPassword {
   token: string;
-  password: string;
+  newPassword: string;
 }
 
 export default class AuthService extends ClientService<any> {
@@ -103,6 +112,28 @@ export default class AuthService extends ClientService<any> {
     config: FetchOptions = {}
   ): Promise<ApiResponse<boolean>> => {
     return await this.fetchInstance(`${this.address}/reset-password`, {
+      method: "POST",
+      body: data,
+      ...config,
+    });
+  };
+
+  VerifyEmail = async (
+    data: IVerifyEmail,
+    config: FetchOptions = {}
+  ): Promise<ApiResponse<string>> => {
+    return await this.fetchInstance(`${this.address}/verify-email`, {
+      method: "POST",
+      body: data,
+      ...config,
+    });
+  };
+
+  ResendVerification = async (
+    data: IResendVerification,
+    config: FetchOptions = {}
+  ): Promise<ApiResponse<boolean>> => {
+    return await this.fetchInstance(`${this.address}/resend-verification`, {
       method: "POST",
       body: data,
       ...config,

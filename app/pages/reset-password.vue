@@ -236,7 +236,7 @@ async function resetPassword() {
     const { $httpClient } = useNuxtApp();
     const response = await $httpClient.auth.ResetPassword({
       token: token.value,
-      password: passwordForm.password,
+      newPassword: passwordForm.password,
     });
 
     if (!response.success) {

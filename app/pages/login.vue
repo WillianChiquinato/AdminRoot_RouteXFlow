@@ -268,7 +268,7 @@
                   {{ registerError }}
                 </p>
                 <button class="login-button" type="submit">
-                  Criar conta <span>→</span>
+                  Continuar <span>→</span>
                 </button>
               </form>
               <p class="signup-copy">
@@ -317,10 +317,133 @@
       </p>
     </section>
   </main>
+
+  <Dialog
+    v-model:visible="finalRegisterDialog"
+    header="Finalizar cadastro"
+    modal
+    :closable="!verifyLoading"
+    :style="{ width: '440px', maxWidth: '92vw' }"
+    @hide="onFinalDialogHide"
+  >
+    <div v-if="finalStep === 'verify'" class="final-dialog">
+      <p class="final-text">
+        Enviamos um código de 5 dígitos para
+        <strong>{{ pendingEmail }}</strong
+        >. Digite-o abaixo para confirmar seu e-mail.
+      </p>
+      <InputOtp
+        v-model="verifyCode"
+        :length="5"
+        integer-only
+        class="final-otp"
+        @keyup.enter="verifyEmail"
+      />
+      <p v-if="verifyError" class="form-error final-error">{{ verifyError }}</p>
+      <button
+        class="login-button"
+        type="button"
+        :disabled="verifyLoading || verifyCode.length < 5"
+        @click="verifyEmail"
+      >
+        Verificar e-mail <span>→</span>
+      </button>
+      <p class="signup-copy">
+        Não recebeu? Confira o spam ou
+        <a
+          href="#"
+          :class="{ disabled: resendCooldown > 0 }"
+          @click.prevent="resendCode"
+          >{{
+            resendCooldown > 0 ? `reenviar em ${resendCooldown}s` : "reenviar código"
+          }}</a
+        >
+      </p>
+    </div>
+
+    <div v-else class="final-dialog">
+      <p class="final-text">
+        <strong>E-mail verificado!</strong> Se quiser, já crie as contas filiais
+        que serão usadas nos celulares. Cada nome de usuário é único e não pode
+        ser repetido.
+      </p>
+
+      <ul v-if="subAccounts.length" class="sub-account-list">
+        <li v-for="account in subAccounts" :key="account.id">
+          <span>{{ account.username }}</span>
+          <button
+            type="button"
+            class="sub-account-remove"
+            title="Remover conta filial"
+            @click="removeSubAccount(account.id)"
+          >
+            ✕
+          </button>
+        </li>
+      </ul>
+
+      <form v-if="subAccountFormOpen" @submit.prevent="addSubAccount" class="dialog-form">
+        <label for="sub-username"
+          >Nome de usuário<div class="password-field"><InputText
+            id="sub-username"
+            v-model="subAccountForm.username"
+            type="text"
+            placeholder="ex: filial.centro"
+            autocomplete="off"
+            maxlength="30"
+        /></div></label>
+        <label for="sub-password"
+                  >Senha
+                  <div class="password-field">
+                    <InputText
+                      id="sub-password"
+                      v-model="subAccountForm.password"
+                      :type="flagSubAccountPasswordEye ? 'text' : 'password'"
+                      placeholder="Crie uma senha"
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      :aria-label="
+                        flagSubAccountPasswordEye
+                          ? 'Ocultar senha'
+                          : 'Mostrar senha'
+                      "
+                      @click="
+                        flagSubAccountPasswordEye = !flagSubAccountPasswordEye
+                      "
+                    >
+                      <EyeOff v-if="!flagSubAccountPasswordEye" :size="17" />
+                      <Eye v-else :size="17" />
+                    </button>
+                  </div></label
+                >
+        <p v-if="subAccountError" class="form-error final-error">
+          {{ subAccountError }}
+        </p>
+        <button class="login-button" type="submit" :disabled="subAccountLoading">
+          Salvar conta filial <span>→</span>
+        </button>
+      </form>
+      <button
+        v-else
+        class="login-button secondary"
+        type="button"
+        @click="subAccountFormOpen = true"
+      >
+        Adicionar conta filial <span>+</span>
+      </button>
+
+      <button class="login-button" type="button" @click="finishFinalRegister">
+        Concluir e entrar <span>→</span>
+      </button>
+    </div>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from "vue";
+import { ref, reactive, watch, onBeforeUnmount } from "vue";
 
 import { Eye } from "@lucide/vue";
 import { EyeOff } from "@lucide/vue";
@@ -333,13 +456,15 @@ import {
   TabPanel,
   Select,
   MultiSelect,
-  InputMask
+  InputMask,
+  InputOtp
 } from "primevue";
 import useLoading from "~/composable/useLoading";
 import { setLoggedUser } from "~/composable/useAuth";
 import { useNuxtApp } from "#app";
 import type { IRole } from "~/infra/interfaces/services/role";
 import type { IApp } from "~/infra/interfaces/services/app";
+import type { ISubAccount } from "~/infra/interfaces/services/subAccount";
 
 import { useToastService } from "~/composable/useToast";
 const toast = useToastService();
@@ -353,6 +478,7 @@ const password = ref("");
 const remember = ref(true);
 const error = ref("");
 
+const finalRegisterDialog = ref(false);
 const flagPasswordEye = ref(false);
 
 async function login() {
@@ -383,6 +509,12 @@ async function login() {
     await new Promise((resolve) => setTimeout(resolve, 300));
     await navigateTo("/");
   } catch (cause: any) {
+    if (cause?.result === "email_not_verified") {
+      toast.error(cause.errors?.[0] ?? "Verifique seu e-mail antes de entrar.");
+      openFinalRegisterDialog(email.value);
+      return;
+    }
+
     const message = cause?.errors?.[0] ?? "Não foi possível entrar. Tente novamente.";
     error.value = message;
     toast.error(message);
@@ -441,6 +573,147 @@ function resetRegisterForm() {
   registerForm.confirmPassword = "";
 }
 
+const RESEND_COOLDOWN_SECONDS = 60;
+
+const finalStep = ref<"verify" | "accounts">("verify");
+const pendingEmail = ref("");
+const verifyCode = ref("");
+const verifyError = ref("");
+const verifyLoading = ref(false);
+const resendCooldown = ref(0);
+let resendTimer: ReturnType<typeof setInterval> | null = null;
+
+const subAccounts = ref<ISubAccount[]>([]);
+const subAccountFormOpen = ref(false);
+const subAccountForm = reactive({ username: "", password: "" });
+const subAccountError = ref("");
+const subAccountLoading = ref(false);
+const flagSubAccountPasswordEye = ref(false);
+
+function startResendCooldown() {
+  resendCooldown.value = RESEND_COOLDOWN_SECONDS;
+  if (resendTimer) clearInterval(resendTimer);
+  resendTimer = setInterval(() => {
+    resendCooldown.value -= 1;
+    if (resendCooldown.value <= 0 && resendTimer) {
+      clearInterval(resendTimer);
+      resendTimer = null;
+    }
+  }, 1000);
+}
+
+onBeforeUnmount(() => {
+  if (resendTimer) clearInterval(resendTimer);
+});
+
+function openFinalRegisterDialog(emailAddress: string) {
+  pendingEmail.value = emailAddress;
+  verifyCode.value = "";
+  verifyError.value = "";
+  finalStep.value = "verify";
+  subAccounts.value = [];
+  subAccountFormOpen.value = false;
+  startResendCooldown();
+  finalRegisterDialog.value = true;
+}
+
+async function verifyEmail() {
+  if (verifyCode.value.length < 5 || verifyLoading.value) return;
+
+  verifyLoading.value = true;
+  verifyError.value = "";
+
+  try {
+    const { $httpClient } = useNuxtApp();
+    await $httpClient.auth.VerifyEmail({
+      email: pendingEmail.value,
+      code: verifyCode.value,
+    });
+
+    toast.success("E-mail verificado com sucesso.");
+    finalStep.value = "accounts";
+  } catch (cause: any) {
+    verifyError.value =
+      cause?.errors?.[0] ?? "Não foi possível verificar o código. Tente novamente.";
+    verifyCode.value = "";
+  } finally {
+    verifyLoading.value = false;
+  }
+}
+
+async function resendCode() {
+  if (resendCooldown.value > 0) return;
+
+  try {
+    const { $httpClient } = useNuxtApp();
+    await $httpClient.auth.ResendVerification({ email: pendingEmail.value });
+    verifyError.value = "";
+    toast.success("Enviamos um novo código para o seu e-mail.");
+    startResendCooldown();
+  } catch (cause: any) {
+    toast.error(cause?.errors?.[0] ?? "Não foi possível reenviar o código.");
+  }
+}
+
+async function addSubAccount() {
+  subAccountError.value = "";
+
+  const username = subAccountForm.username.trim().toLowerCase();
+
+  if (!/^[a-z0-9._]{3,30}$/.test(username)) {
+    subAccountError.value =
+      "O usuário deve ter de 3 a 30 caracteres: letras, números, ponto ou underline.";
+    return;
+  }
+
+  if (subAccountForm.password.length < 8) {
+    subAccountError.value = "A senha deve ter pelo menos 8 caracteres.";
+    return;
+  }
+
+  subAccountLoading.value = true;
+
+  try {
+    const { $httpClient } = useNuxtApp();
+    const response = await $httpClient.subAccount.Create({
+      username,
+      password: subAccountForm.password,
+    });
+
+    subAccounts.value.push(response.result);
+    subAccountForm.username = "";
+    subAccountForm.password = "";
+    subAccountFormOpen.value = false;
+    toast.success("Conta filial criada.");
+  } catch (cause: any) {
+    subAccountError.value =
+      cause?.errors?.[0] ?? "Não foi possível criar a conta filial.";
+  } finally {
+    subAccountLoading.value = false;
+  }
+}
+
+async function removeSubAccount(id: number) {
+  try {
+    const { $httpClient } = useNuxtApp();
+    await $httpClient.subAccount.Delete(id);
+    subAccounts.value = subAccounts.value.filter((account) => account.id !== id);
+  } catch (cause: any) {
+    toast.error(cause?.errors?.[0] ?? "Não foi possível remover a conta filial.");
+  }
+}
+
+function finishFinalRegister() {
+  finalRegisterDialog.value = false;
+}
+
+// Depois da verificação o usuário já está autenticado: fechar o modal leva ao painel.
+async function onFinalDialogHide() {
+  if (finalStep.value === "accounts") {
+    await navigateTo("/");
+  }
+}
+
 async function register() {
   loadingPush();
   registerError.value = "";
@@ -486,10 +759,10 @@ async function register() {
       return;
     }
 
-    toast.success("Cadastro realizado com sucesso. Faça login para continuar.");
+    toast.success("Cadastro realizado. Enviamos um código para o seu e-mail.");
     email.value = registerForm.email;
     resetRegisterForm();
-    activeTab.value = "login";
+    openFinalRegisterDialog(email.value);
   } catch (cause: any) {
     const message =
       cause?.errors?.[0] ?? "Não foi possível concluir o cadastro. Tente novamente.";
@@ -958,6 +1231,160 @@ async function forgotPassword() {
   color: var(--fg-b1bab4);
   font-size: 10px;
 }
+
+
+.final-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.final-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+
+  strong {
+    color: inherit;
+    word-break: break-all;
+  }
+}
+
+.final-dialog {
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  label {
+    display: block;
+    color: var(--fg-506057);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 13px 14px;
+    border: 1px solid var(--bd-dfe8e1);
+    border-radius: 5px;
+    outline: none;
+    color: var(--ink);
+    font-size: 12px;
+    background: transparent;
+
+    &:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px #dff2e6;
+    }
+  }
+
+  .password-field input {
+    padding-right: 40px;
+  }
+
+  .login-button {
+    cursor: pointer;
+  }
+
+  :deep(.p-inputotp-input) {
+    width: 46px;
+    height: 52px;
+    padding: 0;
+    text-align: center;
+    font: 700 20px "Space Grotesk";
+    border: 1px solid var(--bd-dfe8e1);
+    border-radius: 5px;
+    outline: none;
+
+    &:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px #dff2e6;
+    }
+  }
+}
+
+.final-otp {
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.final-error {
+  margin: 0;
+}
+
+.login-button {
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    scale: 1;
+  }
+
+  &.secondary {
+    background: transparent;
+    color: var(--green);
+    border: 1px solid var(--green);
+
+    &:hover {
+      background: var(--bg-eaf7ef);
+    }
+  }
+}
+
+.signup-copy a.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.sub-account-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border: 1px solid var(--bd-e5ece7);
+    border-radius: 5px;
+    font-size: 13px;
+  }
+}
+
+.sub-account-remove {
+  border: 0;
+  background: none;
+  color: var(--fg-9da9a1);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--fg-c65b4d);
+  }
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+
+  > label {
+    display: block;
+    color: var(--fg-506057);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+}
+
 
 @media (max-width: 1050px) {
   .login-brand-panel {

@@ -45,6 +45,10 @@
             <component class="profile-menu-icon" :is="Settings" />
             <span>Configurações</span>
           </NuxtLink>
+          <NuxtLink to="/sub-accounts" class="profile-menu-item" role="menuitem">
+            <component class="profile-menu-icon" :is="User2Icon" />
+            <span>Sub-contas ({{ subAccounts.length }})</span>
+          </NuxtLink>
           <button class="profile-menu-item" role="menuitem" @click="toggleTheme">
             <component class="profile-menu-icon" :is="theme === 'dark' ? Sun : Moon" />
             <span>{{ theme === "dark" ? "Tema claro" : "Tema escuro" }}</span>
@@ -82,6 +86,16 @@
         /></span>
         <span>Configurações</span>
       </NuxtLink>
+      <NuxtLink
+        to="/sub-accounts"
+        class="nav-item"
+        :class="{ active: route.path === '/sub-accounts' }"
+      >
+        <span class="nav-icon"
+          ><component class="nav-icon-component" :is="User2Icon"
+        /></span>
+        <span>Sub-contas ({{ subAccounts.length }})</span>
+      </NuxtLink>
     </nav>
     <div class="sidebar-bottom">
       <div class="support-box">
@@ -105,19 +119,21 @@ import {
   Wallet,
   LogOut,
   Settings,
-  CircleQuestionMark,
   Menu,
   X,
   User,
   Sun,
   Moon,
+  User2Icon,
 } from "@lucide/vue";
 import { logout as logoutUser } from "~/composable/useAuth";
 import { useTheme } from "~/composable/useTheme";
+import { loadSubAccounts, useSubAccountsState } from "~/composable/useSubAccounts";
 import type { IUserProfile } from "~/infra/interfaces/services/user";
 
 const route = useRoute();
 const isOpen = ref(false);
+const subAccounts = useSubAccountsState();
 
 const user = useState<IUserProfile | null>("auth-user", () => null);
 const userName = computed(() => user.value?.name || "Minha conta");
@@ -157,6 +173,7 @@ function closeMenu() {
   isMenuOpen.value = false;
 }
 onMounted(() => {
+  loadSubAccounts().catch(() => {});
   window.addEventListener("keydown", onKeydown);
   window.addEventListener("click", closeMenu);
 });
