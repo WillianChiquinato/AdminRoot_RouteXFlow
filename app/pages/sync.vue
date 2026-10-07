@@ -31,8 +31,8 @@
         <span class="empty-icon">✦</span>
         <h2>Nenhum container cadastrado</h2>
         <p>
-          Crie um container e associe os dispositivos owner e navigation que vão
-          se conectar aos seus apps.
+          Crie um container de delivery ou marketplace e escolha a integração
+          (iFood, Mercado Livre, Shopee...) que vai sincronizar com seus apps.
         </p>
         <button class="primary-button" @click="openRegisterContainer">
           Cadastrar container
@@ -49,6 +49,9 @@
             <div>
               <h2>{{ container.name }}</h2>
               <p>
+                <template v-if="container.integrations?.length"
+                  >{{ integrationsLabel(container.integrations) }} ·
+                </template>
                 {{ ownerDevices(container).length }} owner ·
                 {{ navigationDevices(container).length }} navegação
               </p>
@@ -129,7 +132,75 @@
             fluid
         /></label>
 
-        <div class="device-fields">
+        <div class="type-fields">
+          <p class="field-label">Tipo de container</p>
+          <div class="type-options">
+            <button
+              v-for="option in containerTypeOptions"
+              :key="option.value"
+              type="button"
+              :class="[
+                'type-option',
+                { selected: registerForm.type === option.value },
+              ]"
+              @click="selectRegisterType(option.value)"
+            >
+              <strong>{{ option.label }}</strong>
+              <span>{{ option.description }}</span>
+            </button>
+          </div>
+        </div>
+
+        <label v-if="registerForm.type" for="container-integration"
+          >Integrações
+          <MultiSelect
+            id="container-integration"
+            v-model="registerForm.integrations"
+            :options="registerIntegrationOptions"
+            optionLabel="label"
+            optionValue="value"
+            display="chip"
+            placeholder="Selecione uma ou mais integrações"
+            fluid
+          />
+        </label>
+
+        <div
+          v-if="registerForm.integrations.includes('mercadolivre')"
+          class="integration-box in-dialog"
+        >
+          <div class="integration-status">
+            <span :class="['device-status', { offline: !mlUser }]"
+              ><i></i
+              >{{
+                mlUser
+                  ? `Mercado Livre conectado${mlUser.nickname ? ` · ${mlUser.nickname}` : ""}`
+                  : "Mercado Livre não conectado"
+              }}</span
+            >
+          </div>
+          <div class="integration-actions">
+            <button
+              v-if="mlAwaitingAuth"
+              type="button"
+              class="outline-button"
+              :disabled="mlChecking"
+              @click="checkMercadoLivre(true)"
+            >
+              Já autorizei
+            </button>
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="mlChecking"
+              @click="connectMercadoLivre"
+            >
+              Sincronizar conta Mercado Livre
+            </button>
+          </div>
+        </div>
+
+        <div v-if="registerForm.type" class="device-fields">
           <p class="field-label">Dispositivos</p>
           <div
             v-for="(device, index) in registerForm.devices"
@@ -247,6 +318,38 @@
           <span>Container ativo</span>
         </label>
 
+        <div v-if="editContainerHasMl" class="integration-box in-dialog">
+          <div class="integration-status">
+            <span :class="['device-status', { offline: !mlUser }]"
+              ><i></i
+              >{{
+                mlUser
+                  ? `Mercado Livre conectado${mlUser.nickname ? ` · ${mlUser.nickname}` : ""}`
+                  : "Mercado Livre não conectado"
+              }}</span
+            >
+          </div>
+          <div class="integration-actions">
+            <button
+              v-if="mlAwaitingAuth"
+              type="button"
+              class="outline-button"
+              :disabled="mlChecking"
+              @click="checkMercadoLivre(true)"
+            >
+              Já autorizei
+            </button>
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="mlChecking"
+              @click="connectMercadoLivre"
+            >
+              Sincronizar conta Mercado Livre
+            </button>
+          </div>
+        </div>
+
         <p v-if="editContainerError" class="form-error">
           {{ editContainerError }}
         </p>
@@ -294,6 +397,38 @@
             fluid
           />
         </label>
+
+        <div v-if="editDeviceHasMl" class="integration-box in-dialog">
+          <div class="integration-status">
+            <span :class="['device-status', { offline: !mlUser }]"
+              ><i></i
+              >{{
+                mlUser
+                  ? `Mercado Livre conectado${mlUser.nickname ? ` · ${mlUser.nickname}` : ""}`
+                  : "Mercado Livre não conectado"
+              }}</span
+            >
+          </div>
+          <div class="integration-actions">
+            <button
+              v-if="mlAwaitingAuth"
+              type="button"
+              class="outline-button"
+              :disabled="mlChecking"
+              @click="checkMercadoLivre(true)"
+            >
+              Já autorizei
+            </button>
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="mlChecking"
+              @click="connectMercadoLivre"
+            >
+              Sincronizar conta Mercado Livre
+            </button>
+          </div>
+        </div>
 
         <p v-if="editDeviceError" class="form-error">{{ editDeviceError }}</p>
 
@@ -346,12 +481,20 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue";
 import { Smartphone, Plus, Pencil, Trash2 } from "@lucide/vue";
-import { Checkbox } from "primevue";
+import { Checkbox, MultiSelect } from "primevue";
 import { useNuxtApp } from "#app";
 import useLoading from "~/composable/useLoading";
 import { useToastService } from "~/composable/useToast";
 import { getLoggedUser } from "~/composable/useAuth";
-import type { IContainer } from "~/infra/interfaces/services/container";
+import {
+  containerTypeOptions,
+  integrationsByType,
+  integrationsLabel,
+  type IContainer,
+  type ContainerType,
+  type ContainerIntegration,
+} from "~/infra/interfaces/services/container";
+import type { IMercadoLivreUser } from "~/infra/interfaces/services/mercadoLivre";
 import type {
   IDevice,
   DeviceRole,
@@ -419,17 +562,106 @@ async function loadContainers() {
   }
 }
 
-onMounted(loadContainers);
+// Mercado Livre é a única integração pronta: se o back não informou as
+// integrações do container, assume que ele pode sincronizar.
+function hasMercadoLivre(container?: IContainer | null) {
+  if (!container) return false;
+  if (!container.integrations?.length) return true;
+  return container.integrations.includes("mercadolivre");
+}
+
+const mlUser = ref<IMercadoLivreUser | null>(null);
+const mlChecking = ref(false);
+const mlAwaitingAuth = ref(false);
+
+// Pergunta ao back se o usuário do Mercado Livre já está validado
+// (ele confere o ExpiresAt em profiles). Retorna true quando conectado.
+async function checkMercadoLivre(notify = false) {
+  mlChecking.value = true;
+  try {
+    const { $httpClient } = useNuxtApp();
+    const response = await $httpClient.mercadoLivre.Me();
+    mlUser.value = response.success ? (response.result ?? null) : null;
+
+    if (mlUser.value) {
+      mlAwaitingAuth.value = false;
+      if (notify) toast.success("Mercado Livre conectado.");
+    } else if (notify) {
+      toast.error("Autorização do Mercado Livre ainda não concluída.");
+    }
+  } catch {
+    // 401/expirado: trata como não conectado, sem alarmar o usuário.
+    mlUser.value = null;
+    if (notify) toast.error("Não foi possível validar o Mercado Livre.");
+  } finally {
+    mlChecking.value = false;
+  }
+  return !!mlUser.value;
+}
+
+async function connectMercadoLivre() {
+  if (await checkMercadoLivre()) {
+    toast.success("Mercado Livre já está conectado.");
+    return;
+  }
+
+  mlChecking.value = true;
+  try {
+    const { $httpClient } = useNuxtApp();
+    const response = await $httpClient.mercadoLivre.Authorize();
+    const link =
+      typeof response.result === "string"
+        ? response.result
+        : response.result?.url;
+
+    if (!response.success || !link) {
+      toast.error(
+        response.errors?.[0] ?? "Não foi possível gerar o link de autorização.",
+      );
+      return;
+    }
+
+    mlAwaitingAuth.value = true;
+    window.open(link, "_blank", "noopener");
+  } catch (cause: any) {
+    toast.error(
+      cause?.errors?.[0] ?? "Não foi possível gerar o link de autorização.",
+    );
+  } finally {
+    mlChecking.value = false;
+  }
+}
+
+onMounted(async () => {
+  await loadContainers();
+  if (containers.value.some(hasMercadoLivre)) {
+    await checkMercadoLivre();
+  }
+});
 
 const showRegisterContainer = ref(false);
 const registerForm = reactive({
   name: "",
+  type: "" as ContainerType | "",
+  integrations: [] as ContainerIntegration[],
   devices: [{ name: "", role: "owner" as DeviceRole }],
 });
 const registerError = ref("");
 
+const registerIntegrationOptions = computed(() =>
+  registerForm.type ? integrationsByType[registerForm.type] : [],
+);
+
+function selectRegisterType(type: ContainerType) {
+  if (registerForm.type === type) return;
+  registerForm.type = type;
+  registerForm.integrations = [];
+}
+
 function openRegisterContainer() {
   registerForm.name = "";
+  registerForm.type = "";
+  registerForm.integrations = [];
   registerForm.devices = [{ name: "", role: "owner" }];
   registerError.value = "";
   showRegisterContainer.value = true;
@@ -453,6 +685,18 @@ async function submitRegisterContainer() {
     return;
   }
 
+  if (!registerForm.type) {
+    registerError.value = "Selecione o tipo de container.";
+    toast.error(registerError.value);
+    return;
+  }
+
+  if (registerForm.integrations.length === 0) {
+    registerError.value = "Selecione ao menos uma integração.";
+    toast.error(registerError.value);
+    return;
+  }
+
   if (registerForm.devices.some((device) => !device.name)) {
     registerError.value = "Informe o nome de todos os dispositivos.";
     toast.error(registerError.value);
@@ -464,6 +708,8 @@ async function submitRegisterContainer() {
     const { $httpClient } = useNuxtApp();
     const response = await $httpClient.container.RegisterContainer({
       name: registerForm.name,
+      type: registerForm.type,
+      integrations: registerForm.integrations,
       devices: registerForm.devices.map((device) => ({
         name: device.name,
         role: device.role,
@@ -605,6 +851,16 @@ const showEditDevice = ref(false);
 const editDeviceTarget = ref<IDevice | null>(null);
 const editDeviceForm = reactive({ name: "", role: "owner" as DeviceRole });
 const editDeviceError = ref("");
+
+const editContainerHasMl = computed(() =>
+  hasMercadoLivre(editContainerTarget.value),
+);
+
+const editDeviceHasMl = computed(() =>
+  hasMercadoLivre(
+    containers.value.find((c) => c.id === editDeviceTarget.value?.containerId),
+  ),
+);
 
 const showDeleteDevice = ref(false);
 const deleteDeviceTarget = ref<IDevice | null>(null);
@@ -948,8 +1204,68 @@ footer {
   margin: 0 0 8px;
 }
 
-.device-fields {
+.device-fields,
+.type-fields {
   margin-bottom: 16px;
+}
+
+.type-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.type-option {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--bg-ffffff);
+  border: 1px solid var(--bd-dce6df);
+  border-radius: 6px;
+  transition: 0.2s all;
+
+  strong {
+    font-size: 12px;
+  }
+
+  span {
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  &:hover {
+    border-color: var(--bd-b9dcc5);
+  }
+
+  &.selected {
+    border-color: var(--green);
+    background: var(--bg-eaf7ef);
+  }
+}
+
+.integration-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0 2px;
+  border-top: 1px solid var(--bd-f0f3f0);
+}
+
+.integration-box.in-dialog {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--bd-dce6df);
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.integration-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .device-field-row {

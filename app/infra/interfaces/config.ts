@@ -8,6 +8,7 @@ import type FinanceService from "./services/finance";
 import type WorkSessionService from "./services/workSession";
 import type RouteService from "./services/route";
 import type SubAccountService from "./services/subAccount";
+import type MercadoLivreService from "./services/mercadoLivre";
 
 export interface IClientHttp {
     auth: AuthService;
@@ -20,4 +21,5 @@ export interface IClientHttp {
     workSession: WorkSessionService;
     route: RouteService;
     subAccount: SubAccountService;
+    mercadoLivre: MercadoLivreService;
 }
