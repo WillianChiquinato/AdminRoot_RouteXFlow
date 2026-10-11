@@ -10,6 +10,7 @@ export interface IUserRegister
     phoneNumber: string;
     password: string;
     roleId: number;
+    accountTypeId: number;
     appActives: number[];
 }
 
@@ -36,11 +37,15 @@ export interface IUserProfile {
     email: string;
     cpf: string;
     phoneNumber: string;
+    role: string;
+    roleId: number;
+    accountType: number;
 }
 
 export interface IUpdateProfile {
     name: string;
     phoneNumber: string;
+    accountType: number;
 }
 
 export interface IChangePassword {

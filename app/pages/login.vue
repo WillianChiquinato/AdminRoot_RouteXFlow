@@ -169,12 +169,26 @@
                   />
                 </label>
 
-                <label for="register-apps"
+                <label for="register-account-type"
+                  >Tipo de conta
+                  <Select
+                    id="register-account-type"
+                    v-model="registerForm.accountTypeId"
+                    :options="accountTypes"
+                    optionLabel="name"
+                    optionValue="id"
+                    placeholder="Selecione o tipo de conta"
+                    class="form-dropdown"
+                    fluid
+                  />
+                </label>
+
+                <label v-if="registerForm.accountTypeId" for="register-apps"
                   >Aplicativos que você usa
                   <MultiSelect
                     id="register-apps"
                     v-model="registerForm.appActives"
-                    :options="apps"
+                    :options="filteredApps"
                     optionLabel="name"
                     optionValue="id"
                     placeholder="Selecione os aplicativos"
@@ -525,7 +539,19 @@ async function login() {
 
 const roles = ref<IRole[]>([]);
 const apps = ref<IApp[]>([]);
+const filteredApps = computed(() => {
+  const selected = accountTypes.find((t) => t.id === registerForm.accountTypeId);
+  if (!selected) return [];
+  return apps.value.filter(
+    (app) => app.typeApps?.toLowerCase() === selected.name.toLowerCase(),
+  );
+});
 const appById = (id: number) => apps.value.find((app) => app.id === id);
+
+const accountTypes = [
+  { id: 1, name: "Delivery" },
+  { id: 2, name: "Marketplace" },
+];
 
 const registerForm = reactive({
   name: "",
@@ -533,10 +559,17 @@ const registerForm = reactive({
   cpf: "",
   phoneNumber: "",
   roleId: null as number | null,
+  accountTypeId: null as number | null,
   appActives: [] as number[],
   password: "",
   confirmPassword: "",
 });
+watch(
+  () => registerForm.accountTypeId,
+  () => {
+    registerForm.appActives = [];
+  },
+);
 const registerError = ref("");
 const flagRegisterPasswordEye = ref(false);
 const flagConfirmPasswordEye = ref(false);
@@ -568,6 +601,7 @@ function resetRegisterForm() {
   registerForm.cpf = "";
   registerForm.phoneNumber = "";
   registerForm.roleId = null;
+  registerForm.accountTypeId = null;
   registerForm.appActives = [];
   registerForm.password = "";
   registerForm.confirmPassword = "";
@@ -724,6 +758,7 @@ async function register() {
     !registerForm.cpf ||
     !registerForm.phoneNumber ||
     !registerForm.roleId ||
+    !registerForm.accountTypeId ||
     !registerForm.password
   ) {
     registerError.value = "Preencha todos os campos obrigatórios.";
@@ -751,6 +786,7 @@ async function register() {
       phoneNumber: formatTell,
       password: registerForm.password,
       roleId: registerForm.roleId,
+      accountTypeId: registerForm.accountTypeId,
       appActives: registerForm.appActives,
     });
 

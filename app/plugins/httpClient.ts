@@ -11,6 +11,7 @@ import WorkSessionService from "~/infra/interfaces/services/workSession";
 import RouteService from "~/infra/interfaces/services/route";
 import SubAccountService from "~/infra/interfaces/services/subAccount";
 import MercadoLivreService from "~/infra/interfaces/services/mercadoLivre";
+import AuditService from "~/infra/interfaces/services/audit";
 
 export default defineNuxtPlugin(()=>{
 
@@ -26,6 +27,7 @@ export default defineNuxtPlugin(()=>{
 			route: new RouteService(),
 		subAccount: new SubAccountService(),
 			mercadoLivre: new MercadoLivreService(),
+			audit: new AuditService(),
 	};
 
   return {

@@ -96,6 +96,17 @@
         /></span>
         <span>Sub-contas ({{ subAccounts.length }})</span>
       </NuxtLink>
+      <NuxtLink
+        v-if="isAdminRootDev"
+        to="/audit"
+        class="nav-item"
+        :class="{ active: route.path === '/audit' }"
+      >
+        <span class="nav-icon"
+          ><component class="nav-icon-component" :is="ScrollText"
+        /></span>
+        <span>Auditoria</span>
+      </NuxtLink>
     </nav>
     <div class="sidebar-bottom">
       <div class="support-box">
@@ -125,6 +136,7 @@ import {
   Sun,
   Moon,
   User2Icon,
+  ScrollText,
 } from "@lucide/vue";
 import { logout as logoutUser } from "~/composable/useAuth";
 import { useTheme } from "~/composable/useTheme";
@@ -137,6 +149,7 @@ const subAccounts = useSubAccountsState();
 
 const user = useState<IUserProfile | null>("auth-user", () => null);
 const userName = computed(() => user.value?.name || "Minha conta");
+const isAdminRootDev = computed(() => user.value?.roleId === 999);
 const userInitials = computed(() => {
   const initials = (user.value?.name ?? "")
     .split(" ")

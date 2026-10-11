@@ -51,7 +51,7 @@ const message = computed(() => {
   if (status.value === "success") {
     return "Tudo certo! Sua conta do Mercado Livre já está conectada ao RouteXFlow.";
   }
-  return errorMessage.value || "A autorização foi recusada ou expirou. Tente sincronizar novamente.";
+  return errorMessage.value || "A autorização ou login foi recusada ou expirou. Tente sincronizar novamente.";
 });
 
 function fail(text?: string) {

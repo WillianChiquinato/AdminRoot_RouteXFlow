@@ -380,6 +380,7 @@ async function saveProfile() {
     const response = await $httpClient.user.UpdateProfile({
       name: profileForm.name.trim(),
       phoneNumber: phone,
+      accountType: user.value?.accountType ?? 0,
     });
     if (!response.success) {
       toast.error(errorMessage(response, "Não foi possível salvar o perfil."));

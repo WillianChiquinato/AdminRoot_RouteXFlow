@@ -6,6 +6,7 @@ export interface IApp {
   id: number;
   name: string;
   iconUrl?: string | null;
+  typeApps: string;
 }
 
 export default class AppService extends ClientService<any> {

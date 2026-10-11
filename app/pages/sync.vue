@@ -64,7 +64,11 @@
               >
                 <Pencil :size="14" />
               </button>
-              <button class="outline-button" @click="openAddDevice(container)">
+              <button
+                v-if="!isMarketplaceAccount || container.devices.length === 0"
+                class="outline-button"
+                @click="openAddDevice(container)"
+              >
                 + Dispositivo
               </button>
             </div>
@@ -132,26 +136,7 @@
             fluid
         /></label>
 
-        <div class="type-fields">
-          <p class="field-label">Tipo de container</p>
-          <div class="type-options">
-            <button
-              v-for="option in containerTypeOptions"
-              :key="option.value"
-              type="button"
-              :class="[
-                'type-option',
-                { selected: registerForm.type === option.value },
-              ]"
-              @click="selectRegisterType(option.value)"
-            >
-              <strong>{{ option.label }}</strong>
-              <span>{{ option.description }}</span>
-            </button>
-          </div>
-        </div>
-
-        <label v-if="registerForm.type" for="container-integration"
+        <label for="container-integration"
           >Integrações
           <MultiSelect
             id="container-integration"
@@ -200,8 +185,11 @@
           </div>
         </div>
 
-        <div v-if="registerForm.type" class="device-fields">
+        <div class="device-fields">
           <p class="field-label">Dispositivos</p>
+          <p v-if="isMarketplaceAccount" class="field-hint">
+            Contas Marketplace usam apenas 1 celular.
+          </p>
           <div
             v-for="(device, index) in registerForm.devices"
             :key="index"
@@ -213,9 +201,10 @@
             />
             <Dropdown
               v-model="device.role"
-              :options="roleOptions"
+              :options="deviceRoleOptions"
               optionLabel="label"
               optionValue="value"
+              optionDisabled="disabled"
               class="role-dropdown"
             />
             <button
@@ -228,7 +217,12 @@
               <Trash2 :size="14" />
             </button>
           </div>
-          <button type="button" class="add-device-button" @click="addDeviceRow">
+          <button
+            v-if="!isMarketplaceAccount"
+            type="button"
+            class="add-device-button"
+            @click="addDeviceRow"
+          >
             <Plus :size="14" /> Adicionar dispositivo
           </button>
         </div>
@@ -271,9 +265,10 @@
           <Dropdown
             id="device-role"
             v-model="addDeviceForm.role"
-            :options="roleOptions"
+            :options="deviceRoleOptions"
             optionLabel="label"
             optionValue="value"
+            optionDisabled="disabled"
             class="role-dropdown"
             fluid
           />
@@ -390,9 +385,10 @@
           <Dropdown
             id="edit-device-role"
             v-model="editDeviceForm.role"
-            :options="roleOptions"
+            :options="deviceRoleOptions"
             optionLabel="label"
             optionValue="value"
+            optionDisabled="disabled"
             class="role-dropdown"
             fluid
           />
@@ -487,7 +483,6 @@ import useLoading from "~/composable/useLoading";
 import { useToastService } from "~/composable/useToast";
 import { getLoggedUser } from "~/composable/useAuth";
 import {
-  containerTypeOptions,
   integrationsByType,
   integrationsLabel,
   type IContainer,
@@ -520,6 +515,18 @@ const roleOptions: { label: string; value: DeviceRole; type: DeviceType }[] = [
   { label: "Mestre", value: "owner", type: 1 },
   { label: "Navegação", value: "navigation", type: 2 },
 ];
+
+// accountTypeId: 1 = Delivery, 2 = Marketplace (definido no registro do usuário).
+const isMarketplaceAccount = user?.accountType === 2;
+const accountContainerType: ContainerType = isMarketplaceAccount
+  ? "marketplace"
+  : "delivery";
+
+// Marketplace usa um único celular, então o papel Navegação fica travado.
+const deviceRoleOptions = roleOptions.map((option) => ({
+  ...option,
+  disabled: isMarketplaceAccount && option.value === "navigation",
+}));
 
 function roleToType(role: DeviceRole): DeviceType {
   return roleOptions.find((option) => option.value === role)?.type ?? 1;
@@ -642,25 +649,15 @@ onMounted(async () => {
 const showRegisterContainer = ref(false);
 const registerForm = reactive({
   name: "",
-  type: "" as ContainerType | "",
   integrations: [] as ContainerIntegration[],
   devices: [{ name: "", role: "owner" as DeviceRole }],
 });
 const registerError = ref("");
 
-const registerIntegrationOptions = computed(() =>
-  registerForm.type ? integrationsByType[registerForm.type] : [],
-);
-
-function selectRegisterType(type: ContainerType) {
-  if (registerForm.type === type) return;
-  registerForm.type = type;
-  registerForm.integrations = [];
-}
+const registerIntegrationOptions = integrationsByType[accountContainerType];
 
 function openRegisterContainer() {
   registerForm.name = "";
-  registerForm.type = "";
   registerForm.integrations = [];
   registerForm.devices = [{ name: "", role: "owner" }];
   registerError.value = "";
@@ -685,12 +682,6 @@ async function submitRegisterContainer() {
     return;
   }
 
-  if (!registerForm.type) {
-    registerError.value = "Selecione o tipo de container.";
-    toast.error(registerError.value);
-    return;
-  }
-
   if (registerForm.integrations.length === 0) {
     registerError.value = "Selecione ao menos uma integração.";
     toast.error(registerError.value);
@@ -708,7 +699,7 @@ async function submitRegisterContainer() {
     const { $httpClient } = useNuxtApp();
     const response = await $httpClient.container.RegisterContainer({
       name: registerForm.name,
-      type: registerForm.type,
+      type: accountContainerType,
       integrations: registerForm.integrations,
       devices: registerForm.devices.map((device) => ({
         name: device.name,
@@ -755,6 +746,12 @@ async function submitAddDevice() {
   addDeviceError.value = "";
 
   if (!addDeviceTarget.value) return;
+
+  if (isMarketplaceAccount && addDeviceTarget.value.devices.length >= 1) {
+    addDeviceError.value = "Contas Marketplace permitem apenas 1 dispositivo.";
+    toast.error(addDeviceError.value);
+    return;
+  }
 
   if (!addDeviceForm.name) {
     addDeviceError.value = "Informe o nome do dispositivo.";
@@ -1202,6 +1199,12 @@ footer {
   font-size: 11px;
   font-weight: 600;
   margin: 0 0 8px;
+}
+
+.field-hint {
+  color: var(--fg-506057);
+  font-size: 11px;
+  margin: -4px 0 8px;
 }
 
 .device-fields,

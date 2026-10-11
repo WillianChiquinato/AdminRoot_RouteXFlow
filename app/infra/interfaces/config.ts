@@ -9,6 +9,7 @@ import type WorkSessionService from "./services/workSession";
 import type RouteService from "./services/route";
 import type SubAccountService from "./services/subAccount";
 import type MercadoLivreService from "./services/mercadoLivre";
+import type AuditService from "./services/audit";
 
 export interface IClientHttp {
     auth: AuthService;
@@ -22,4 +23,5 @@ export interface IClientHttp {
     route: RouteService;
     subAccount: SubAccountService;
     mercadoLivre: MercadoLivreService;
+    audit: AuditService;
 }
