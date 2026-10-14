@@ -516,16 +516,19 @@ const roleOptions: { label: string; value: DeviceRole; type: DeviceType }[] = [
   { label: "Navegação", value: "navigation", type: 2 },
 ];
 
-// accountTypeId: 1 = Delivery, 2 = Marketplace (definido no registro do usuário).
+// accountType: 1 = Delivery, 2 = Marketplace (definido no registro do usuário).
 const isMarketplaceAccount = user?.accountType === 2;
 const accountContainerType: ContainerType = isMarketplaceAccount
   ? "marketplace"
   : "delivery";
 
-// Marketplace usa um único celular, então o papel Navegação fica travado.
+// Marketplace usa um único celular, que é sempre o navigation: o Mestre fica travado.
+const defaultDeviceRole: DeviceRole = isMarketplaceAccount
+  ? "navigation"
+  : "owner";
 const deviceRoleOptions = roleOptions.map((option) => ({
   ...option,
-  disabled: isMarketplaceAccount && option.value === "navigation",
+  disabled: isMarketplaceAccount && option.value === "owner",
 }));
 
 function roleToType(role: DeviceRole): DeviceType {
@@ -650,7 +653,7 @@ const showRegisterContainer = ref(false);
 const registerForm = reactive({
   name: "",
   integrations: [] as ContainerIntegration[],
-  devices: [{ name: "", role: "owner" as DeviceRole }],
+  devices: [{ name: "", role: defaultDeviceRole }],
 });
 const registerError = ref("");
 
@@ -659,13 +662,13 @@ const registerIntegrationOptions = integrationsByType[accountContainerType];
 function openRegisterContainer() {
   registerForm.name = "";
   registerForm.integrations = [];
-  registerForm.devices = [{ name: "", role: "owner" }];
+  registerForm.devices = [{ name: "", role: defaultDeviceRole }];
   registerError.value = "";
   showRegisterContainer.value = true;
 }
 
 function addDeviceRow() {
-  registerForm.devices.push({ name: "", role: "owner" });
+  registerForm.devices.push({ name: "", role: defaultDeviceRole });
 }
 
 function removeDeviceRow(index: number) {
@@ -731,13 +734,13 @@ async function submitRegisterContainer() {
 
 const showAddDevice = ref(false);
 const addDeviceTarget = ref<IContainer | null>(null);
-const addDeviceForm = reactive({ name: "", role: "owner" as DeviceRole });
+const addDeviceForm = reactive({ name: "", role: defaultDeviceRole });
 const addDeviceError = ref("");
 
 function openAddDevice(container: IContainer) {
   addDeviceTarget.value = container;
   addDeviceForm.name = "";
-  addDeviceForm.role = "owner";
+  addDeviceForm.role = defaultDeviceRole;
   addDeviceError.value = "";
   showAddDevice.value = true;
 }

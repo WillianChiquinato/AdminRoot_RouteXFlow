@@ -78,6 +78,7 @@
             </div>
             <div class="sync-row-counts">
               <span
+                v-if="!isMarketplaceAccount"
                 :class="[
                   'count-pill',
                   ownerConnected(container).length >= 1 ? 'ok' : 'warn',
@@ -475,11 +476,14 @@ function navigationConnected(container: IContainer) {
   );
 }
 
+// Conta Marketplace (accountType 2) usa 1 celular, que é o navigation.
+const isMarketplaceAccount = user?.accountType === 2;
+
 const isReadyToStart = computed(() =>
   containers.value.some(
     (container) =>
       container.isActive &&
-      ownerConnected(container).length >= 1 &&
+      (isMarketplaceAccount || ownerConnected(container).length >= 1) &&
       navigationConnected(container).length >= 1,
   ),
 );
@@ -487,7 +491,7 @@ const isReadyToStart = computed(() =>
 async function loadContainers() {
   try {
     const { $httpClient } = useNuxtApp();
-    const response = await $httpClient.container.ContainerList();
+    const response = await $httpClient.container.ContainerListWithNoSession();
     if (response.success) {
       containers.value = response.result;
     }

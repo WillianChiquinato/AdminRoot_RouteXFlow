@@ -100,6 +100,13 @@ export default class ContainerService extends ClientService<any> {
     });
   };
 
+  ContainerListWithNoSession = async (config: FetchOptions = {}): Promise<ApiResponse<IContainer[]>> => {
+    return await this.fetchInstance(`${this.address}/getContainersWithNoSession`, {
+      method: "GET",
+      ...config,
+    });
+  }
+
   RegisterContainer = async (data: IContainerRegister, config: FetchOptions = {}): Promise<ApiResponse<IContainer>> => {
     return await this.fetchInstance(`${this.address}/registerContainer`, {
       method: "POST",
