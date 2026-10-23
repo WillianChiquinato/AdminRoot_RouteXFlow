@@ -1,5 +1,8 @@
 <template>
   <AppToast />
+  <div class="env-banner">
+    ⚠️ Ambiente de homologação — sistema em desenvolvimento. Os dados podem ser alterados ou apagados a qualquer momento.
+  </div>
   <div>
     <LoadingScreen v-if="isLoading" class="loading-overlay" />
     <NuxtLayout>
@@ -21,6 +24,18 @@ const { isLoading } = useLoading();
 </script>
 
 <style lang="scss" scoped>
+.env-banner {
+  position: sticky;
+  top: 0;
+  z-index: 9000;
+  padding: 6px 12px;
+  background-color: #f59e0b;
+  color: #1a1203;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .loading-overlay {
   position: fixed;
   top: 0;

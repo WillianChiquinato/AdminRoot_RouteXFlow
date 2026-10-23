@@ -160,7 +160,7 @@
                   <Select
                     id="register-role"
                     v-model="registerForm.roleId"
-                    :options="roles"
+                    :options="availableRoles"
                     optionLabel="name"
                     optionValue="id"
                     placeholder="Selecione um perfil"
@@ -177,6 +177,7 @@
                     :options="accountTypes"
                     optionLabel="name"
                     optionValue="id"
+                    :optionDisabled="(option: any) => !option.active"
                     placeholder="Selecione o tipo de conta"
                     class="form-dropdown"
                     fluid
@@ -538,6 +539,9 @@ async function login() {
 }
 
 const roles = ref<IRole[]>([]);
+const availableRoles = computed(() =>
+  roles.value.filter((role) => role.name?.trim().toLowerCase() !== "root"),
+);
 const apps = ref<IApp[]>([]);
 const filteredApps = computed(() => {
   const selected = accountTypes.find((t) => t.id === registerForm.accountTypeId);
@@ -549,8 +553,8 @@ const filteredApps = computed(() => {
 const appById = (id: number) => apps.value.find((app) => app.id === id);
 
 const accountTypes = [
-  { id: 1, name: "Delivery" },
-  { id: 2, name: "Marketplace" },
+  { id: 1, name: "Delivery", active: false },
+  { id: 2, name: "Marketplace", active: true },
 ];
 
 const registerForm = reactive({
