@@ -29,6 +29,9 @@ FROM node:24-alpine AS runner
 
 WORKDIR /app
 
+# O healthcheck do Coolify roda dentro do container e usa curl
+RUN apk add --no-cache curl
+
 # O .output do Nitro já é autocontido (inclui as dependências necessárias)
 COPY --from=builder /app/.output ./.output
 
