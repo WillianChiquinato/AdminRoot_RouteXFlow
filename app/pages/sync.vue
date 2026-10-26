@@ -31,8 +31,8 @@
         <span class="empty-icon">✦</span>
         <h2>Nenhum container cadastrado</h2>
         <p>
-          Crie um container de delivery ou marketplace e escolha a integração
-          (iFood, Mercado Livre, Shopee...) que vai sincronizar com seus apps.
+          Crie um container de marketplace e escolha a integração
+          (Mercado Livre, Shopee...) que vai sincronizar com seus apps.
         </p>
         <button class="primary-button" @click="openRegisterContainer">
           Cadastrar container
@@ -181,6 +181,27 @@
               @click="connectMercadoLivre"
             >
               Sincronizar conta Mercado Livre
+            </button>
+          </div>
+        </div>
+
+        <div
+          v-if="registerForm.integrations.includes('shopee')"
+          class="integration-box in-dialog"
+        >
+          <div class="integration-status">
+            <span class="device-status offline"
+              ><i></i>Autorize sua conta ao Shopee</span
+            >
+          </div>
+          <div class="integration-actions">
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="shopeeConnecting"
+              @click="connectShopee"
+            >
+              Sincronizar conta Shopee
             </button>
           </div>
         </div>
@@ -345,6 +366,24 @@
           </div>
         </div>
 
+        <div v-if="editContainerHasShopee" class="integration-box in-dialog">
+          <div class="integration-status">
+            <span class="device-status offline"
+              ><i></i>Autorize sua conta ao Shopee</span
+            >
+          </div>
+          <div class="integration-actions">
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="shopeeConnecting"
+              @click="connectShopee"
+            >
+              Sincronizar conta Shopee
+            </button>
+          </div>
+        </div>
+
         <p v-if="editContainerError" class="form-error">
           {{ editContainerError }}
         </p>
@@ -422,6 +461,24 @@
               @click="connectMercadoLivre"
             >
               Sincronizar conta Mercado Livre
+            </button>
+          </div>
+        </div>
+
+        <div v-if="editDeviceHasShopee" class="integration-box in-dialog">
+          <div class="integration-status">
+            <span class="device-status offline"
+              ><i></i>Autorize sua conta ao Shopee</span
+            >
+          </div>
+          <div class="integration-actions">
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="shopeeConnecting"
+              @click="connectShopee"
+            >
+              Sincronizar conta Shopee
             </button>
           </div>
         </div>
@@ -642,6 +699,40 @@ async function connectMercadoLivre() {
   }
 }
 
+// A Shopee não expõe um "me" no back: o status é confirmado na tela de retorno.
+function hasShopee(container?: IContainer | null) {
+  return !!container?.integrations?.includes("shopee");
+}
+
+const shopeeConnecting = ref(false);
+
+async function connectShopee() {
+  shopeeConnecting.value = true;
+  try {
+    const { $httpClient } = useNuxtApp();
+    const response = await $httpClient.shopee.Authorize();
+    const link =
+      typeof response.result === "string"
+        ? response.result
+        : response.result?.url;
+
+    if (!response.success || !link) {
+      toast.error(
+        response.errors?.[0] ?? "Não foi possível gerar o link de autorização.",
+      );
+      return;
+    }
+
+    window.open(link, "_blank", "noopener");
+  } catch (cause: any) {
+    toast.error(
+      cause?.errors?.[0] ?? "Não foi possível gerar o link de autorização.",
+    );
+  } finally {
+    shopeeConnecting.value = false;
+  }
+}
+
 onMounted(async () => {
   await loadContainers();
   if (containers.value.some(hasMercadoLivre)) {
@@ -858,6 +949,16 @@ const editContainerHasMl = computed(() =>
 
 const editDeviceHasMl = computed(() =>
   hasMercadoLivre(
+    containers.value.find((c) => c.id === editDeviceTarget.value?.containerId),
+  ),
+);
+
+const editContainerHasShopee = computed(() =>
+  hasShopee(editContainerTarget.value),
+);
+
+const editDeviceHasShopee = computed(() =>
+  hasShopee(
     containers.value.find((c) => c.id === editDeviceTarget.value?.containerId),
   ),
 );

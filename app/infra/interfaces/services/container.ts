@@ -15,7 +15,7 @@ export type ContainerIntegration =
 export interface IIntegrationOption {
   value: ContainerIntegration;
   label: string;
-  // Só o Mercado Livre tem integração OAuth pronta por enquanto.
+  // Mercado Livre e Shopee têm integração OAuth pronta.
   available: boolean;
 }
 
@@ -44,7 +44,7 @@ export const integrationsByType: Record<ContainerType, IIntegrationOption[]> = {
   ],
   marketplace: [
     { value: "mercadolivre", label: "Mercado Livre", available: true },
-    { value: "shopee", label: "Shopee", available: false },
+    { value: "shopee", label: "Shopee", available: true },
   ],
 };
 

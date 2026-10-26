@@ -11,28 +11,29 @@ import WorkSessionService from "~/infra/interfaces/services/workSession";
 import RouteService from "~/infra/interfaces/services/route";
 import SubAccountService from "~/infra/interfaces/services/subAccount";
 import MercadoLivreService from "~/infra/interfaces/services/mercadoLivre";
+import ShopeeService from "~/infra/interfaces/services/shopee";
 import AuditService from "~/infra/interfaces/services/audit";
 
-export default defineNuxtPlugin(()=>{
-
+export default defineNuxtPlugin(() => {
   const httpClientServices: IClientHttp = {
-		auth: new AuthService(),
-		user: new UserService(),
-		role: new RoleService(),
-		app: new AppService(),
-		container: new ContainerService(),
-		device: new DeviceService(),
-		finance: new FinanceService(),
-		workSession: new WorkSessionService(),
-			route: new RouteService(),
-		subAccount: new SubAccountService(),
-			mercadoLivre: new MercadoLivreService(),
-			audit: new AuditService(),
-	};
+    auth: new AuthService(),
+    user: new UserService(),
+    role: new RoleService(),
+    app: new AppService(),
+    container: new ContainerService(),
+    device: new DeviceService(),
+    finance: new FinanceService(),
+    workSession: new WorkSessionService(),
+    route: new RouteService(),
+    subAccount: new SubAccountService(),
+    mercadoLivre: new MercadoLivreService(),
+    shopee: new ShopeeService(),
+    audit: new AuditService(),
+  };
 
   return {
-		provide: {
-			httpClient: httpClientServices,
-		},
-	};
-})
+    provide: {
+      httpClient: httpClientServices,
+    },
+  };
+});
