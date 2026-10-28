@@ -49,6 +49,24 @@
             <component class="profile-menu-icon" :is="User2Icon" />
             <span>Sub-contas ({{ subAccounts.length }})</span>
           </NuxtLink>
+          <NuxtLink
+            v-if="isAdminRootDev"
+            to="/audit"
+            class="profile-menu-item"
+            role="menuitem"
+          >
+            <component class="profile-menu-icon" :is="ScrollText" />
+            <span>Auditoria</span>
+          </NuxtLink>
+          <NuxtLink
+            v-if="isAdminRootDev"
+            to="/authorization"
+            class="profile-menu-item"
+            role="menuitem"
+          >
+            <component class="profile-menu-icon" :is="UserCheck" />
+            <span>Autorizações</span>
+          </NuxtLink>
           <button class="profile-menu-item" role="menuitem" @click="toggleTheme">
             <component class="profile-menu-icon" :is="theme === 'dark' ? Sun : Moon" />
             <span>{{ theme === "dark" ? "Tema claro" : "Tema escuro" }}</span>
@@ -96,17 +114,6 @@
         /></span>
         <span>Sub-contas ({{ subAccounts.length }})</span>
       </NuxtLink>
-      <NuxtLink
-        v-if="isAdminRootDev"
-        to="/audit"
-        class="nav-item"
-        :class="{ active: route.path === '/audit' }"
-      >
-        <span class="nav-icon"
-          ><component class="nav-icon-component" :is="ScrollText"
-        /></span>
-        <span>Auditoria</span>
-      </NuxtLink>
     </nav>
     <div class="sidebar-bottom">
       <div class="support-box">
@@ -137,6 +144,7 @@ import {
   Moon,
   User2Icon,
   ScrollText,
+  UserCheck,
 } from "@lucide/vue";
 import { logout as logoutUser } from "~/composable/useAuth";
 import { useTheme } from "~/composable/useTheme";

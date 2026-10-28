@@ -376,9 +376,20 @@
       </p>
     </div>
 
+    <div v-else-if="finalStep === 'approval'" class="final-dialog">
+      <p class="final-text">
+        <strong>E-mail verificado!</strong> Seu cadastro foi recebido e a conta
+        precisa ser autorizada pelos administradores antes do acesso completo.
+        Aguarde a aprovação; avisaremos assim que ela for liberada.
+      </p>
+      <button class="login-button" type="button" @click="finalStep = 'accounts'">
+        Entendi <span>→</span>
+      </button>
+    </div>
+
     <div v-else class="final-dialog">
       <p class="final-text">
-        <strong>E-mail verificado!</strong> Se quiser, já crie as contas filiais
+        Se quiser, já crie as contas filiais
         que serão usadas nos celulares. Cada nome de usuário é único e não pode
         ser repetido.
       </p>
@@ -451,7 +462,7 @@
       </button>
 
       <button class="login-button" type="button" @click="finishFinalRegister">
-        Concluir e entrar <span>→</span>
+        Concluir <span>→</span>
       </button>
     </div>
   </Dialog>
@@ -475,7 +486,7 @@ import {
   InputOtp
 } from "primevue";
 import useLoading from "~/composable/useLoading";
-import { setLoggedUser } from "~/composable/useAuth";
+import { clearAuth, logout as logoutUser } from "~/composable/useAuth";
 import { useNuxtApp } from "#app";
 import type { IRole } from "~/infra/interfaces/services/role";
 import type { IApp } from "~/infra/interfaces/services/app";
@@ -613,7 +624,7 @@ function resetRegisterForm() {
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
-const finalStep = ref<"verify" | "accounts">("verify");
+const finalStep = ref<"verify" | "approval" | "accounts">("verify");
 const pendingEmail = ref("");
 const verifyCode = ref("");
 const verifyError = ref("");
@@ -669,7 +680,7 @@ async function verifyEmail() {
     });
 
     toast.success("E-mail verificado com sucesso.");
-    finalStep.value = "accounts";
+    finalStep.value = "approval";
   } catch (cause: any) {
     verifyError.value =
       cause?.errors?.[0] ?? "Não foi possível verificar o código. Tente novamente.";
@@ -745,11 +756,18 @@ function finishFinalRegister() {
   finalRegisterDialog.value = false;
 }
 
-// Depois da verificação o usuário já está autenticado: fechar o modal leva ao painel.
+// A verificação abre sessão, mas a conta ainda precisa de autorização:
+// ao fechar o modal encerramos a sessão e o usuário permanece no login.
 async function onFinalDialogHide() {
-  if (finalStep.value === "accounts") {
-    await navigateTo("/");
+  if (finalStep.value === "verify") return;
+
+  try {
+    await logoutUser();
+  } catch {
+    clearAuth();
   }
+  finalStep.value = "verify";
+  toast.success("Cadastro concluído. Aguarde a autorização dos administradores.");
 }
 
 async function register() {

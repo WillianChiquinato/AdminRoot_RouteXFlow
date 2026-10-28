@@ -53,10 +53,50 @@ export interface IChangePassword {
     newPassword: string;
 }
 
+export interface IPendingUser {
+    id: number;
+    name: string;
+    email: string;
+    cpf: string;
+    phoneNumber: string;
+    role: string;
+    roleId: number;
+    accountType: string;
+    apps: string[];
+    createdAt: string;
+    emailVerifiedAt: string | null;
+}
+
+export interface IRejectUser {
+    reason: string;
+}
+
 export default class UserService extends ClientService<any> {
   constructor() {
     super("User", "api/User");
   }
+
+  GetPending = async (config: FetchOptions = {}): Promise<ApiResponse<IPendingUser[]>> => {
+    return await this.fetchInstance(`${this.address}/pending`, {
+      method: "GET",
+      ...config,
+    });
+  };
+
+  Approve = async (id: number, config: FetchOptions = {}): Promise<ApiResponse<boolean>> => {
+    return await this.fetchInstance(`${this.address}/${id}/approve`, {
+      method: "POST",
+      ...config,
+    });
+  };
+
+  Reject = async (id: number, data: IRejectUser, config: FetchOptions = {}): Promise<ApiResponse<boolean>> => {
+    return await this.fetchInstance(`${this.address}/${id}/reject`, {
+      method: "POST",
+      body: data,
+      ...config,
+    });
+  };
 
   Register = async (data: IUserRegister, config: FetchOptions = {}): Promise<ApiResponse<boolean>> => {
     return await this.fetchInstance(`${this.address}/register`, {
