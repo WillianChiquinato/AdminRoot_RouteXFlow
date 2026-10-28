@@ -486,7 +486,7 @@ const toast = useToastService();
 
 const { loadingPush, loadingPop } = useLoading();
 
-const activeTab = ref("login");
+const activeTab = ref(useRoute().query.tab === "register" ? "register" : "login");
 
 const email = ref("");
 const password = ref("");

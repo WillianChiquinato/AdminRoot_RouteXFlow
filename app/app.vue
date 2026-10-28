@@ -1,6 +1,7 @@
 <template>
   <AppToast />
-  <div class="env-banner">
+  <PageTransition />
+  <div v-if="route.path !== '/institucional'" class="env-banner">
     ⚠️ Ambiente de homologação — sistema em desenvolvimento. Os dados podem ser alterados ou apagados a qualquer momento.
   </div>
   <div>
@@ -17,10 +18,12 @@ import { useHead, useNuxtApp } from '#app';
 import { computed } from 'vue';
 
 import AppToast from './components/Toast/Toast.vue';
+import PageTransition from './components/UI/PageTransition.vue';
 import LoadingScreen from './components/UI/LoadingScreen.vue';
 import useLoading from "~/composable/useLoading";
 
 const { isLoading } = useLoading();
+const route = useRoute();
 </script>
 
 <style lang="scss" scoped>

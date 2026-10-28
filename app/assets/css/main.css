@@ -9,6 +9,10 @@
   --sidebar: #f6f8f6;
 }
 
+html{
+  scroll-behavior: smooth;
+}
+
 /* Tema escuro (ativado por sessão, ver composable/useTheme.ts). Os tokens --bg-*, --fg-* e --bd-* vêm de theme.css. */
 html.app-dark {
   color-scheme: dark;
